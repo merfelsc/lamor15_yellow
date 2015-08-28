@@ -44,7 +44,7 @@ class topol_nav_client(object):
         self.client.send_goal(navgoal)#,self.done_cb, self.active_cb, self.feedback_cb)
     
         # Waits for the server to finish performing the action.
-        self.client.wait_for_result()
+        self.client.wait_for_result(timeout=rospy.Duration(60.0))
     
         # Prints out the result of executing the action
         ps = self.client.get_result()  # A FibonacciResult
@@ -74,14 +74,14 @@ class random_walker(object):
         
     def run(self):
         while not rospy.is_shutdown():
-            if self._running:
-                for name in names:
+            for name in names:
+                if self._running:           
                     print 'going to ', name
                     self._action.call_action(name)
                     if self._running:
                         rospy.sleep(10.0)
-            else:
-                rospy.sleep(1.0)
+                else:
+                    rospy.sleep(1.0)
 
 if __name__ == '__main__':
     rospy.init_node('random_walker')
