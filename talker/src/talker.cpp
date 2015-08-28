@@ -2,7 +2,7 @@
 
 #include "talker.hpp"
 
-Talker::Talker(): n("~")
+Talker::Talker(): n("~"), stop_rnd_walk(false), new_task(false)
 {
 	name_tag_sub = n.subscribe<std_msgs::String>(/* "/" + robot +*/ "/tag_name_detected", 1000, &Talker::tagSubscriber, this);
 
@@ -12,22 +12,8 @@ Talker::Talker(): n("~")
 	ros::spinOnce();
 }
 
-void Talker::tagSubscriber(const std_msgs::String::ConstPtr& _msg)
+void Talker::startDialog()
 {
-	text = _msg->data;
-}
-
-void Talker::update()
-{	
-	std_srvs::Empty srv;
-
-	// if I wanna start it
-    rnd_walk_start.call(srv);
-
-	// else i wanna stop
-	rnd_walk_stop.call(srv);
-
-	// if i need to talk
 	actionlib::SimpleActionClient<mary_tts::maryttsAction> ac("/speak", true);
 	ac.waitForServer();
 
@@ -36,7 +22,43 @@ void Talker::update()
   	ac.sendGoal(goal);
 
 	bool finished_before_timeout = ac.waitForResult(ros::Duration(30.0));
-	
+	if (finished_before_timeout)
+	{
+	  actionlib::SimpleClientGoalState state = ac.getState();
+	  ROS_INFO("Action finished: %s",state.toString().c_str());
+	  stop_rnd_walk = true;	
+	}
+}
+
+void Talker::tagSubscriber(const std_msgs::String::ConstPtr& _msg)
+{
+	if( (_msg->data).compare(text) != 0)
+	{
+		new_task = true;
+		text = _msg->data;
+		std::cerr<<"This is another person: " + text<<std::endl;
+	}
+}
+
+void Talker::update()
+{	
+	std_srvs::Empty srv;
+
+	if (new_task)
+	{
+		new_task = false;
+		rnd_walk_stop.call(srv);
+		startDialog();
+		
+		std::cerr<<"I would like to start roaming again..."<<std::endl;
+//		rnd_walk_start.call(srv);
+	}
+
+/*	if(stop_rnd_walk)
+	{
+		stop_rnd_walk = false;
+		rnd_walk_start.call(srv);
+	}*/
 }
 
 int main(int argc, char** argv)

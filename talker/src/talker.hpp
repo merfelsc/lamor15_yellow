@@ -10,6 +10,8 @@
 #include <actionlib/client/terminal_state.h>
 #include <mary_tts/maryttsAction.h>
 
+#include <iostream>
+
 class Talker
 {
 private:
@@ -20,12 +22,15 @@ private:
 
 	ros::ServiceClient rnd_walk_start;
 	ros::ServiceClient rnd_walk_stop;
-
+	bool stop_rnd_walk;
+	bool new_task;
 
 
 public:
 	Talker();
 
+
+	void startDialog();
 	void tagSubscriber(const std_msgs::String::ConstPtr& _msg);
 	void update();
 	~Talker(){}
