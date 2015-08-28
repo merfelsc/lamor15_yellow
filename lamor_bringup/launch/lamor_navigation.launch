@@ -106,11 +106,11 @@
     <arg name="wait_reset_bumper_duration" value="$(arg wait_reset_bumper_duration)"/>
   </include>
 
-    <!--- Emergency Behaviours includes strands emails -->
+    <!--- Emergency Behaviours includes strands emails 
   <include file="$(find emergency_behaviours)/launch/emergency_behaviours.launch">
     <arg name="machine" value="$(arg topo_nav_machine)"/>
     <arg name="user" value="$(arg topo_nav_user)"/>
-  </include>
+  </include>-->
 
   <node name="odometry_mileage" pkg="odometry_mileage" type="odometry_mileage" respawn="true"/>
   <!-- <node name="door_pass_node" pkg="door_pass" type="door_pass.py" output="screen" /> --> <!-- Might still be needed -->

@@ -8,7 +8,7 @@ tmux new-window -t $SESSION:0 -n 'roscore'
 tmux new-window -t $SESSION:1 -n 'core'
 tmux new-window -t $SESSION:2 -n 'simulation'
 tmux new-window -t $SESSION:3 -n '2d_nav'
-tmux new-window -t $SESSION:4 -n 'navigation'
+tmux new-window -t $SESSION:4 -n 'topologic'
 
 
 tmux select-window -t $SESSION:0
@@ -23,13 +23,13 @@ tmux select-window -t $SESSION:1
 tmux send-keys "DISPLAY=:0 roslaunch mongodb_store mongodb_store.launch db_path:=$HOME/mongodb_lamor"
 
 tmux select-window -t $SESSION:2
-tmux send-keys "DISPLAY=:0 roslaunch strands_morse uol_bl_morse.launch"
+tmux send-keys "DISPLAY=:0 roslaunch strands_morse uol_bl_morse.launch env:=uol_bl_fast"
 
 tmux select-window -t $SESSION:3
 tmux send-keys "DISPLAY=:0 roslaunch strands_morse uol_bl_nav2d.launch"
 
 tmux select-window -t $SESSION:4
-tmux send-keys "DISPLAY=:0 roslaunch strands_morse uol_bl_nav2d.launch"
+tmux send-keys "DISPLAY=:0 roslaunch topological_utils create_topological_map.launch met_map:=bandl top_map:=bl_sim"
 
 
 # Set default window
