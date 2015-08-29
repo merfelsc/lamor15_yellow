@@ -1,10 +1,10 @@
 
 
-#include "talker.hpp"
+#include "controller.hpp"
 
-Talker::Talker(): n("~"), stop_rnd_walk(false), new_task(false)
+Controller::Controller(): n("~"), new_task(false)
 {
-	name_tag_sub = n.subscribe<std_msgs::String>(/* "/" + robot +*/ "/tag_name_detected", 1000, &Talker::tagSubscriber, this);
+	name_tag_sub = n.subscribe<std_msgs::String>(/* "/" + robot +*/ "/tag_name_detected", 1000, &Controller::tagSubscriber, this);
 
 	rnd_walk_start = n.serviceClient<std_srvs::Empty>("start_random_walk");
 	rnd_walk_stop = n.serviceClient<std_srvs::Empty>("stop_random_walk");
@@ -12,7 +12,7 @@ Talker::Talker(): n("~"), stop_rnd_walk(false), new_task(false)
 	ros::spinOnce();
 }
 
-void Talker::startDialog()
+void Controller::startDialog()
 {
 	actionlib::SimpleActionClient<mary_tts::maryttsAction> ac("/speak", true);
 	ac.waitForServer();
@@ -26,11 +26,10 @@ void Talker::startDialog()
 	{
 	  actionlib::SimpleClientGoalState state = ac.getState();
 	  ROS_INFO("Action finished: %s",state.toString().c_str());
-	  stop_rnd_walk = true;	
 	}
 }
 
-void Talker::tagSubscriber(const std_msgs::String::ConstPtr& _msg)
+void Controller::tagSubscriber(const std_msgs::String::ConstPtr& _msg)
 {
 	if( (_msg->data).compare(text) != 0)
 	{
@@ -40,7 +39,7 @@ void Talker::tagSubscriber(const std_msgs::String::ConstPtr& _msg)
 	}
 }
 
-void Talker::update()
+void Controller::update()
 {	
 	std_srvs::Empty srv;
 
@@ -48,29 +47,22 @@ void Talker::update()
 	{
 		new_task = false;
 		rnd_walk_stop.call(srv);
-		startDialog();
-		
+		startDialog();		
 		std::cerr<<"I would like to start roaming again..."<<std::endl;
-//		rnd_walk_start.call(srv);
-	}
-
-/*	if(stop_rnd_walk)
-	{
-		stop_rnd_walk = false;
 		rnd_walk_start.call(srv);
-	}*/
+	}
 }
 
 int main(int argc, char** argv)
 {
-	ros::init(argc, argv, "talker_bev");
-	Talker theTalker;
+	ros::init(argc, argv, "controller_bev");
+	Controller theController;
 	
 	ros::Rate loop_rate(5); // [Hz]
 
     while(ros::ok())
     {
-		theTalker.update();
+		theController.update();
     	
 		ros::spinOnce();
         loop_rate.sleep();

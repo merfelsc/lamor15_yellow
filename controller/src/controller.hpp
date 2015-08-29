@@ -1,5 +1,5 @@
-#ifndef _TALKER_NODE_HPP_
-#define _TALKER_NODE_HPP_
+#ifndef _CONTROLLER_NODE_HPP_
+#define _CONTROLLER_NODE_HPP_
 
 #include <ros/ros.h>
 #include <std_msgs/String.h>
@@ -12,28 +12,22 @@
 
 #include <iostream>
 
-class Talker
+class Controller
 {
 private:
 	ros::NodeHandle n;
 	std::string text;
-
 	ros::Subscriber name_tag_sub;
-
 	ros::ServiceClient rnd_walk_start;
 	ros::ServiceClient rnd_walk_stop;
-	bool stop_rnd_walk;
 	bool new_task;
 
-
 public:
-	Talker();
-
-
+	Controller();
 	void startDialog();
 	void tagSubscriber(const std_msgs::String::ConstPtr& _msg);
 	void update();
-	~Talker(){}
+	~Controller(){}
 };
 
 #endif
