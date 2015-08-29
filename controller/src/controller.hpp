@@ -41,7 +41,7 @@ public:
 
 private:
 	/** increase the number of times, that we have seen a specific person, by one.**/
-	void updatePersonSeen(const int & person_id);
+	void updatePersonSeen(const int & _person_id);
 	void fillDictionary();
 };
 

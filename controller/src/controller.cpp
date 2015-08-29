@@ -27,12 +27,24 @@ void Controller::startDialog()
 	if(it != name_dict.end()) {
 		name = it->second;
 	} else {
-		name = "unknown person"; // start an alarm?
+		name = "unknown person. I do not recognize you"; // start an alarm?
 	}
 
 	ss << "Hi " << name << ".";
-	ss << " Welcome to the ECMR. I am looking forward to seeing you again.";
-	ss << std::endl;
+
+	// check how often we have seen that person before
+	std::map<int,int>::iterator it_count;
+	it_count = memory_ppl.find(person_id);
+	if(it_count != memory_ppl.end()) {
+		ss << "We have already met " << it_count->second << " times before.";
+		ss << "I hope we'll keep in touch." << std::endl;
+	} else {
+		ss << " Welcome to the ECMR.";
+		ss << " Be aware of the other robots. They are plotting an evil plan";
+		ss << " against you. Especially the green one.";
+		ss << " I am looking forward to seeing you again.";
+		ss << std::endl;
+	}	
 
 	mary_tts::maryttsGoal goal;
   	goal.text = ss.str();
@@ -69,7 +81,7 @@ void Controller::tagSubscriber(const std_msgs::Int32::ConstPtr& _msg)
 	{
 		new_task = true;
 		person_id = _msg->data;
-		std::cerr<<"This is another person with the id: " + person_id<<std::endl;
+		std::cerr<<"This is another person with the id: "<<person_id<<std::endl;
 	}
 }
 
@@ -81,21 +93,33 @@ void Controller::update()
 	{
 		new_task = false;
 		// update our people memory
+		updatePersonSeen(person_id);
 
 		std::cerr<<"Let's stop here for a while..."<<std::endl;
 		rnd_walk_stop.call(srv);
 
 		std::cerr<<"I feel active..."<<std::endl;
 		startDialog();
-		startGaze();
+		//startGaze();
 		
 		std::cerr<<"I would like to start roaming again..."<<std::endl;
 		rnd_walk_start.call(srv);
 	}
 }
 
-void Controller::updatePersonSeen(const int & person_id) {
+void Controller::updatePersonSeen(const int & _person_id) {
 	// check whether that person exists in the memory
+	std::map<int,int>::iterator it;
+	it = memory_ppl.find(_person_id);
+	if(it != memory_ppl.end()) {
+		// increase it for a known user
+		std::cerr<<"I have seen the person already "<<it->second<<" times."<<std::endl;
+		memory_ppl[_person_id] = it->second++;
+	} else {
+		// init new user
+		std::cerr<<"This is a new person to me."<<std::endl;
+		memory_ppl[_person_id] = 1;
+	}
 }
 
 void Controller::fillDictionary() {
