@@ -7,6 +7,7 @@ import actionlib
 import topological_navigation.msg
 from strands_navigation_msgs.msg import TopologicalMap
 from std_srvs.srv import Empty
+from random import shuffle
 
 class topol_map_info(object):
     def __init__(self) :
@@ -91,7 +92,8 @@ if __name__ == '__main__':
     while not get_names.hasNames():
         rospy.sleep(1.0)
     
-    names = get_names.getNames()
+    names = list(get_names.getNames())
+    shuffle(names)
     print names
     
     walker = random_walker(names)
