@@ -2,7 +2,7 @@
 
 #include "controller.hpp"
 
-Controller::Controller(): n("~"), new_task(false)
+Controller::Controller(): n("~"), new_task(false), ac("/speak", true)
 {
 	name_tag_sub = n.subscribe<std_msgs::String>(/* "/" + robot +*/ "/tag_name_detected", 1000, &Controller::tagSubscriber, this);
 
@@ -14,7 +14,7 @@ Controller::Controller(): n("~"), new_task(false)
 
 void Controller::startDialog()
 {
-	actionlib::SimpleActionClient<mary_tts::maryttsAction> ac("/speak", true);
+	std::cerr<<"I feel like I should talk more..."<<std::endl;
 	ac.waitForServer();
 
 	mary_tts::maryttsGoal goal;
@@ -46,7 +46,9 @@ void Controller::update()
 	if (new_task)
 	{
 		new_task = false;
+		std::cerr<<"Let's stop here for a while..."<<std::endl;
 		rnd_walk_stop.call(srv);
+		std::cerr<<"I feel active..."<<std::endl;
 		startDialog();		
 		std::cerr<<"I would like to start roaming again..."<<std::endl;
 		rnd_walk_start.call(srv);

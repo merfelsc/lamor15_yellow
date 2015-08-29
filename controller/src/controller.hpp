@@ -18,6 +18,8 @@ private:
 	ros::NodeHandle n;
 	std::string text;
 	ros::Subscriber name_tag_sub;
+
+	actionlib::SimpleActionClient<mary_tts::maryttsAction> ac;
 	ros::ServiceClient rnd_walk_start;
 	ros::ServiceClient rnd_walk_stop;
 	bool new_task;
