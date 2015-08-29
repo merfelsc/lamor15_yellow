@@ -39,7 +39,7 @@ void Controller::startDialog()
 		ss << "We have already met " << it_count->second << " times before.";
 		ss << "I hope we'll keep in touch." << std::endl;
 	} else {
-		ss << " Welcome to the ECMR.";
+		ss << " Welcome to the E C M R.";
 		ss << " Be aware of the other robots. They are plotting an evil plan";
 		ss << " against you. Especially the green one.";
 		ss << " I am looking forward to seeing you again.";
@@ -63,7 +63,7 @@ void Controller::startGaze()
 	ac_gaze.waitForServer();
 
 	strands_gazing::GazeAtPoseGoal goal;
-  	goal.runtime_sec = 120;
+  	goal.runtime_sec = 0;
 	goal.topic_name = "/upper_body_detector/closest_bounding_box_centre";	
   	ac_gaze.sendGoal(goal);
 
@@ -98,10 +98,11 @@ void Controller::update()
 		std::cerr<<"Let's stop here for a while..."<<std::endl;
 		rnd_walk_stop.call(srv);
 
+		startGaze();
 		std::cerr<<"I feel active..."<<std::endl;
-		startDialog();
-		//startGaze();
+		startDialog();		
 		
+		ac_gaze.cancelAllGoals();
 		std::cerr<<"I would like to start roaming again..."<<std::endl;
 		rnd_walk_start.call(srv);
 	}
