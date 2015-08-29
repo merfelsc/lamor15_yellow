@@ -67,7 +67,7 @@ void Controller::startGaze()
 	goal.topic_name = "/upper_body_detector/closest_bounding_box_centre";	
   	ac_gaze.sendGoal(goal);
 
-	bool finished_before_timeout = ac_gaze.waitForResult(ros::Duration(30.0));
+	bool finished_before_timeout = ac_gaze.waitForResult(ros::Duration(10.0));
 	if (finished_before_timeout)
 	{
 	  actionlib::SimpleClientGoalState state = ac_gaze.getState();
