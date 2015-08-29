@@ -22,7 +22,6 @@ private:
 
 	ros::ServiceClient rnd_walk_start;
 	ros::ServiceClient rnd_walk_stop;
-	bool stop_rnd_walk;
 	bool new_task;
 
 

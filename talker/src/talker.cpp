@@ -2,9 +2,9 @@
 
 #include "talker.hpp"
 
-Talker::Talker(): n("~"), stop_rnd_walk(false), new_task(false)
+Talker::Talker(): n("~"), new_task(false)
 {
-	name_tag_sub = n.subscribe<std_msgs::String>(/* "/" + robot +*/ "/tag_name_detected", 1000, &Talker::tagSubscriber, this);
+	name_tag_sub = n.subscribe<std_msgs::String>("/tag_name_detected", 1000, &Talker::tagSubscriber, this);
 
 	rnd_walk_start = n.serviceClient<std_srvs::Empty>("start_random_walk");
 	rnd_walk_stop = n.serviceClient<std_srvs::Empty>("stop_random_walk");
@@ -26,7 +26,6 @@ void Talker::startDialog()
 	{
 	  actionlib::SimpleClientGoalState state = ac.getState();
 	  ROS_INFO("Action finished: %s",state.toString().c_str());
-	  stop_rnd_walk = true;	
 	}
 }
 
@@ -51,14 +50,8 @@ void Talker::update()
 		startDialog();
 		
 		std::cerr<<"I would like to start roaming again..."<<std::endl;
-//		rnd_walk_start.call(srv);
-	}
-
-/*	if(stop_rnd_walk)
-	{
-		stop_rnd_walk = false;
 		rnd_walk_start.call(srv);
-	}*/
+	}
 }
 
 int main(int argc, char** argv)
