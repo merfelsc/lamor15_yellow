@@ -9,6 +9,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
 #include <mary_tts/maryttsAction.h>
+#include <strands_gazing/GazeAtPoseAction.h>
 
 #include <iostream>
 
@@ -19,7 +20,8 @@ private:
 	std::string text;
 	ros::Subscriber name_tag_sub;
 
-	actionlib::SimpleActionClient<mary_tts::maryttsAction> ac;
+	actionlib::SimpleActionClient<mary_tts::maryttsAction> ac_speak;
+	actionlib::SimpleActionClient<strands_gazing::GazeAtPoseAction> ac_gaze;
 	ros::ServiceClient rnd_walk_start;
 	ros::ServiceClient rnd_walk_stop;
 	bool new_task;
@@ -27,6 +29,7 @@ private:
 public:
 	Controller();
 	void startDialog();
+	void startGaze();
 	void tagSubscriber(const std_msgs::String::ConstPtr& _msg);
 	void update();
 	~Controller(){}
