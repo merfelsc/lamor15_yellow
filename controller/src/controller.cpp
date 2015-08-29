@@ -1,13 +1,14 @@
-
-
+#include <sstream>
 #include "controller.hpp"
 
-Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true)
+Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1)
 {
-	name_tag_sub = n.subscribe<std_msgs::String>(/* "/" + robot +*/ "/tag_name_detected", 1000, &Controller::tagSubscriber, this);
+	name_tag_sub = n.subscribe<std_msgs::Int32>(/* "/" + robot +*/ "/tag_name_detected", 1000, &Controller::tagSubscriber, this);
 
-	rnd_walk_start = n.serviceClient<std_srvs::Empty>("start_random_walk");
-	rnd_walk_stop = n.serviceClient<std_srvs::Empty>("stop_random_walk");
+	rnd_walk_start = n.serviceClient<std_srvs::Empty>("/start_random_walk");
+	rnd_walk_stop = n.serviceClient<std_srvs::Empty>("/stop_random_walk");
+
+	fillDictionary();
 
 	ros::spinOnce();
 }
@@ -17,8 +18,24 @@ void Controller::startDialog()
 	std::cerr<<"I feel like I should talk more..."<<std::endl;
 	ac_speak.waitForServer();
 
+	std::stringstream ss;
+	std::string name = "";
+
+	// get the name for that person
+	std::map<int,std::string>::iterator it;
+	it = name_dict.find(person_id);
+	if(it != name_dict.end()) {
+		name = it->second;
+	} else {
+		name = "unknown person"; // start an alarm?
+	}
+
+	ss << "Hi " << name << ".";
+	ss << " Welcome to the ECMR. I am looking forward to seeing you again.";
+	ss << std::endl;
+
 	mary_tts::maryttsGoal goal;
-  	goal.text = text;
+  	goal.text = ss.str();
   	ac_speak.sendGoal(goal);
 
 	bool finished_before_timeout = ac_speak.waitForResult(ros::Duration(30.0));
@@ -46,13 +63,13 @@ void Controller::startGaze()
 	}
 }
 
-void Controller::tagSubscriber(const std_msgs::String::ConstPtr& _msg)
+void Controller::tagSubscriber(const std_msgs::Int32::ConstPtr& _msg)
 {
-	if( (_msg->data).compare(text) != 0)
+	if( person_id != _msg->data )
 	{
 		new_task = true;
-		text = _msg->data;
-		std::cerr<<"This is another person: " + text<<std::endl;
+		person_id = _msg->data;
+		std::cerr<<"This is another person with the id: " + person_id<<std::endl;
 	}
 }
 
@@ -63,6 +80,8 @@ void Controller::update()
 	if (new_task)
 	{
 		new_task = false;
+		// update our people memory
+
 		std::cerr<<"Let's stop here for a while..."<<std::endl;
 		rnd_walk_stop.call(srv);
 
@@ -73,6 +92,18 @@ void Controller::update()
 		std::cerr<<"I would like to start roaming again..."<<std::endl;
 		rnd_walk_start.call(srv);
 	}
+}
+
+void Controller::updatePersonSeen(const int & person_id) {
+	// check whether that person exists in the memory
+}
+
+void Controller::fillDictionary() {
+	// fill the name dictionary with peoples' names
+	name_dict[0] = "Bob";
+	name_dict[1] = "Betty";
+	name_dict[2] = "Linda";
+	name_dict[3] = "Lucie";
 }
 
 int main(int argc, char** argv)
