@@ -61,10 +61,6 @@ void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 		return;
 	}
 	
-	std::cout << circles.begin()->x << ", " << circles.begin()->y << std::endl;
-	std::cout << (circles.begin()+1)->x << ", " << (circles.begin()+1)->y << std::endl;
-	std::cout << angle_offset/M_PI << std::endl;
-
 	int i =0;
 	int personId = 0;
 	for (std::vector<SSegment>::iterator it=circles.begin(); it!=circles.end(); ++it) {
