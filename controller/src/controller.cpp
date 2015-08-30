@@ -43,8 +43,8 @@ void Controller::startDialog()
       weather::TellWeather srv;
       if(client_weather.call(srv)) {
         // we got a new weather update
-        std::cerr<<"Received a new weather update: " << srv.response.weather << std::endl;
-        ss << srv.response.weather << std::endl;
+        std::cerr<<"Received a new weather update: " << srv.response.fact << std::endl;
+        ss << srv.response.fact << std::endl;
       } else {
         std::cerr<<"Did not receive a new weather update."<<std::endl;
       }
