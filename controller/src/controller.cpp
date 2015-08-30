@@ -1,7 +1,7 @@
 #include <sstream>
 #include "controller.hpp"
 
-Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1)
+Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("tell_facts")), initialized(false)
 {
 	name_tag_sub = n.subscribe<std_msgs::Int32>(/* "/" + robot +*/ "/tag_name_detected", 1000, &Controller::tagSubscriber, this);
 
@@ -37,7 +37,17 @@ void Controller::startDialog()
 	it_count = memory_ppl.find(person_id);
 	if(it_count != memory_ppl.end()) {
 		ss << "We have already met " << it_count->second << " times before.";
-		ss << "I hope we'll keep in touch." << std::endl;
+
+    // query the facts service
+    facts::TellFacts srv;
+    srv.request.person = person_id;
+    if(client_facts.call(srv)) {
+      // we got a new fact
+      std::cerr<<"Received a new fact: " << srv.response.fact << std::endl;
+      ss << srv.response.fact << std::endl;
+    } else {
+      std::cerr<<"Did not receive a new fact."<<std::endl;
+    }
 	} else {
 		ss << " Welcome to the E C M R.";
 		ss << " Be aware of the other robots. They are plotting an evil plan";
@@ -89,6 +99,12 @@ void Controller::update()
 {	
 	std_srvs::Empty srv;
 
+  // initialization: start with random walking
+  if(!initialized) {
+    rnd_walk_start.call(srv);
+    initialized=true; // will never bet to false again
+  }
+
 	if (new_task)
 	{
 		new_task = false;
@@ -98,6 +114,7 @@ void Controller::update()
 		std::cerr<<"Let's stop here for a while..."<<std::endl;
 		rnd_walk_stop.call(srv);
 
+    std::cerr<<"Look at this!"<<std::endl;
 		startGaze();
 		std::cerr<<"I feel active..."<<std::endl;
 		startDialog();		
@@ -138,13 +155,13 @@ int main(int argc, char** argv)
 	
 	ros::Rate loop_rate(5); // [Hz]
 
-    while(ros::ok())
-    {
+  while(ros::ok())
+  {
 		theController.update();
     	
 		ros::spinOnce();
-        loop_rate.sleep();
-    }
+    loop_rate.sleep();
+  }
 
-    return 0;
+  return 0;
 }
