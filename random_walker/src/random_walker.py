@@ -68,12 +68,12 @@ class random_walker(object):
 
     def _start_random_walk(self, req):
         self._running = True
-        return EmptyResponse()
+        return EmptySrvResponse()
         
     def _stop_random_walk(self, req):
         self._running = False
         self._action.cancle_action()
-        return EmptyResponse()
+        return EmptySrvResponse()
         
     def run(self):
         while not rospy.is_shutdown():
