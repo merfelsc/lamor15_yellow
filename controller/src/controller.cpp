@@ -3,7 +3,7 @@
 
 Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("tell_facts")), initialized(false)
 {
-	name_tag_sub = n.subscribe<std_msgs::Int32>(/* "/" + robot +*/ "/tag_name_detected", 1000, &Controller::tagSubscriber, this);
+	name_tag_sub = n.subscribe<circle_detection::detection_results_array>("/circle_detection/results_array", 1000, &Controller::tagSubscriber, this);
 
 	rnd_walk_start = n.serviceClient<std_srvs::Empty>("/start_random_walk");
 	rnd_walk_stop = n.serviceClient<std_srvs::Empty>("/stop_random_walk");
@@ -85,12 +85,12 @@ void Controller::startGaze()
 	}
 }
 
-void Controller::tagSubscriber(const std_msgs::Int32::ConstPtr& _msg)
+void Controller::tagSubscriber(const circle_detection::detection_results_array::ConstPtr& _msg)
 {
-	if( person_id != _msg->data )
+	if( person_id != _msg->personId )
 	{
 		new_task = true;
-		person_id = _msg->data;
+		person_id = _msg->personId;
 		std::cerr<<"This is another person with the id: "<<person_id<<std::endl;
 	}
 }
