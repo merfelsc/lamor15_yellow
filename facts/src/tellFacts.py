@@ -17,11 +17,12 @@ def handle_facts_req(req):
 
     # add person
     if pid not in history or len(history[pid]) == 0:
-        history[pid] = range(0, len(facts))
+        history[pid] = range(len(facts))
 
     # randomize responses
     fid = random.choice(history[pid])
-    del history[pid][fid]
+
+    del history[pid][history[pid].index(fid)]
     return TellFactsResponse(facts[fid])
 
 
