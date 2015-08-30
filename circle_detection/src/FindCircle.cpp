@@ -1,5 +1,15 @@
 #include "FindCircle.h"
 
+#define ONE_ROUND_RADIAN (2*M_PI)
+#define ANGLE_THRLD_RATE (0.1*ONE_ROUND_RADIAN)
+
+// Compute the orientation (in radian) of the vector from start to end circle
+double angleBetweenCircles(const SSegment &start, const SSegment &end) {
+	double del_x = end.x - start.x ;
+	double del_y = end.y - start.y ;
+	return atan2(del_y,del_x);
+}
+
 std::string FindCircle::generateUUID(std::string time, int id) {
     boost::uuids::name_generator gen(dns_namespace_uuid);
     time += num_to_str<int>(id);
@@ -31,17 +41,25 @@ void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 	}
 	
 	// Early rejection if the candidate circles are not enough
-	if (circles.size()!=NUM_CIRCLES) {
+	if (circles.size()<NUM_CIRCLES) {
 		return;
 	}
+	
+    std::cout << "--" << std::endl;
 	
 	// Sort the detected circles according to the bwRatio
 	std::sort(circles.begin(),circles.end(),compare_circle);
 	
-	// Get the angle from 0th circle to 1st circle
-	double del_x = (circles.begin()+1)->x - circles.begin()->x ;
-	double del_y = (circles.begin()+1)->y - circles.begin()->y ;
-	double angle_offset = atan2(del_y,del_x); //TODO: deal with del_x==0.0
+	// Get the angle from 0th circle to 2nd circle
+	const double angle_offset = angleBetweenCircles( *(circles.begin()), *(circles.begin()+1) );
+
+	// Sanity check: compare the second line's orientation
+	// Get the angle from 3rd circle to 4th circle
+	double angle_check = angleBetweenCircles( *(circles.begin()+2), *(circles.begin()+3) );
+	if (abs(angle_offset-angle_check)>ANGLE_THRLD_RATE) {
+		std::cout << "second line doesn't allign!" << std::endl;
+		return;
+	}
 	
 	std::cout << circles.begin()->x << ", " << circles.begin()->y << std::endl;
 	std::cout << (circles.begin()+1)->x << ", " << (circles.begin()+1)->y << std::endl;
