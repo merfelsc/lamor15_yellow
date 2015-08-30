@@ -97,13 +97,13 @@ void Controller::tagSubscriber(const std_msgs::Int32::ConstPtr& _msg)
 
 void Controller::update()
 {	
+	std_srvs::Empty srv;
+
   // initialization: start with random walking
   if(!initialized) {
     rnd_walk_start.call(srv);
     initialized=true; // will never bet to false again
   }
-
-	std_srvs::Empty srv;
 
 	if (new_task)
 	{
