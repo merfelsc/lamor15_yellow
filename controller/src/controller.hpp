@@ -32,6 +32,7 @@ private:
 	bool new_task;
 	std::map<int,int> memory_ppl; // key: person_id, value: number of times seen
 	std::map<int,std::string> name_dict; // dictionary for peoples' name
+  bool initialized;
 
 public:
 	Controller();

@@ -1,7 +1,7 @@
 #include <sstream>
 #include "controller.hpp"
 
-Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("tell_facts"))
+Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("tell_facts")), initialized(false)
 {
 	name_tag_sub = n.subscribe<std_msgs::Int32>(/* "/" + robot +*/ "/tag_name_detected", 1000, &Controller::tagSubscriber, this);
 
@@ -97,6 +97,12 @@ void Controller::tagSubscriber(const std_msgs::Int32::ConstPtr& _msg)
 
 void Controller::update()
 {	
+  // initialization: start with random walking
+  if(!initialized) {
+    rnd_walk_start.call(srv);
+    initialized=true; // will never bet to false again
+  }
+
 	std_srvs::Empty srv;
 
 	if (new_task)
@@ -148,8 +154,6 @@ int main(int argc, char** argv)
 	Controller theController;
 	
 	ros::Rate loop_rate(5); // [Hz]
-
-	rnd_walk_start.call(srv);
 
   while(ros::ok())
   {
