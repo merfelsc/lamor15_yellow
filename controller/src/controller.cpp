@@ -1,7 +1,7 @@
 #include <sstream>
 #include "controller.hpp"
 
-Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("tell_facts")), initialized(false)
+Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("/tell_facts")), initialized(false)
 {
 	name_tag_sub = n.subscribe<circle_detection::detection_results_array>("/circle_detection/results_array", 1000, &Controller::tagSubscriber, this);
 
