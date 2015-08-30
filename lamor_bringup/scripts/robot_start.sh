@@ -18,8 +18,8 @@ tmux new-window -t $SESSION:7 -n 'mary'
 tmux new-window -t $SESSION:8 -n 'facts'
 tmux new-window -t $SESSION:9 -n 'weather'
 tmux new-window -t $SESSION:10 -n 'random_walk' 
-tmux new-window -t $SESSION:11 -n 'controller'
-
+tmux new-window -t $SESSION:11 -n 'circle_detection'
+tmux new-window -t $SESSION:12 -n 'controller'
 
 
 tmux select-window -t $SESSION:0
@@ -61,8 +61,10 @@ tmux select-window -t $SESSION:10
 tmux send-keys "DISPLAY=:0 rosrun random_walker random_walker.py"
 
 tmux select-window -t $SESSION:11
-tmux send-keys "DISPLAY=:0 roslaunch controller controller_robot.launch"
+tmux send-keys "DISPLAY=:0 roslaunch circle_detection multi_cam_circle_detection.launch"
 
+tmux select-window -t $SESSION:12
+tmux send-keys "DISPLAY=:0 roslaunch controller controller_robot.launch"
 
 # Set default window
 tmux select-window -t $SESSION:0
