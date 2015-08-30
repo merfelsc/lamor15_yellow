@@ -1,9 +1,9 @@
 #include <sstream>
 #include "controller.hpp"
 
-Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("tell_facts")), initialized(false)
+Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("/tell_facts")), initialized(false), client_weather(n.serviceClient<weather::TellWeather>("/tell_weather")), person_counter(0), person_last_id(-1), sleepStarted(ros::Time::now() - ros::Duration(30))
 {
-	name_tag_sub = n.subscribe<std_msgs::Int32>(/* "/" + robot +*/ "/tag_name_detected", 1000, &Controller::tagSubscriber, this);
+	name_tag_sub = n.subscribe<circle_detection::detection_results_array>("/circle_detection/results_array", 1000, &Controller::tagSubscriber, this);
 
 	rnd_walk_start = n.serviceClient<std_srvs::Empty>("/start_random_walk");
 	rnd_walk_stop = n.serviceClient<std_srvs::Empty>("/stop_random_walk");
@@ -27,7 +27,7 @@ void Controller::startDialog()
 	if(it != name_dict.end()) {
 		name = it->second;
 	} else {
-		name = "unknown person. I do not recognize you"; // start an alarm?
+		name = "you"; // start an alarm?
 	}
 
 	ss << "Hi " << name << ".";
@@ -36,17 +36,36 @@ void Controller::startDialog()
 	std::map<int,int>::iterator it_count;
 	it_count = memory_ppl.find(person_id);
 	if(it_count != memory_ppl.end()) {
-		ss << "We have already met " << it_count->second << " times before.";
-
-    // query the facts service
-    facts::TellFacts srv;
-    srv.request.person = person_id;
-    if(client_facts.call(srv)) {
-      // we got a new fact
-      std::cerr<<"Received a new fact: " << srv.response.fact << std::endl;
-      ss << srv.response.fact << std::endl;
+		ss << "We have already met " << it_count->second;
+    if(it_count->second == 1) {
+      ss<<"time";
     } else {
-      std::cerr<<"Did not receive a new fact."<<std::endl;
+      ss<<"times";
+    }
+    ss << " before.";
+
+    if(it_count->second == 3) {
+      // tell him about the weather
+      weather::TellWeather srv;
+      if(client_weather.call(srv)) {
+        // we got a new weather update
+        std::cerr<<"Received a new weather update: " << srv.response.fact << std::endl;
+        ss << srv.response.fact << std::endl;
+      } else {
+        std::cerr<<"Did not receive a new weather update."<<std::endl;
+      }
+    } else {
+      // query the facts service
+      facts::TellFacts srv;
+      srv.request.person = person_id;
+      if(client_facts.call(srv)) {
+        // we got a new fact
+        std::cerr<<"Received a new fact: " << srv.response.fact << std::endl;
+        ss << "Fact: ";
+        ss << srv.response.fact << std::endl;
+      } else {
+        std::cerr<<"Did not receive a new fact."<<std::endl;
+      }
     }
 	} else {
 		ss << " Welcome to the E C M R.";
@@ -57,10 +76,12 @@ void Controller::startDialog()
 	}	
 
 	mary_tts::maryttsGoal goal;
-  	goal.text = ss.str();
-  	ac_speak.sendGoal(goal);
+ 	goal.text = ss.str();
+  std::cerr<<"<speaking>...";
+ 	ac_speak.sendGoal(goal);
 
-	bool finished_before_timeout = ac_speak.waitForResult(ros::Duration(30.0));
+	bool finished_before_timeout = ac_speak.waitForResult(ros::Duration(15.0));
+  std::cerr<<"</speaking>"<<std::endl;
 	if (finished_before_timeout)
 	{
 	  actionlib::SimpleClientGoalState state = ac_speak.getState();
@@ -73,11 +94,11 @@ void Controller::startGaze()
 	ac_gaze.waitForServer();
 
 	strands_gazing::GazeAtPoseGoal goal;
-  	goal.runtime_sec = 0;
+	goal.runtime_sec = 0;
 	goal.topic_name = "/upper_body_detector/closest_bounding_box_centre";	
-  	ac_gaze.sendGoal(goal);
+  ac_gaze.sendGoal(goal);
 
-	bool finished_before_timeout = ac_gaze.waitForResult(ros::Duration(10.0));
+	bool finished_before_timeout = ac_gaze.waitForResult(ros::Duration(1.0));
 	if (finished_before_timeout)
 	{
 	  actionlib::SimpleClientGoalState state = ac_gaze.getState();
@@ -85,14 +106,29 @@ void Controller::startGaze()
 	}
 }
 
-void Controller::tagSubscriber(const std_msgs::Int32::ConstPtr& _msg)
+void Controller::tagSubscriber(const circle_detection::detection_results_array::ConstPtr& _msg)
 {
-	if( person_id != _msg->data )
-	{
-		new_task = true;
-		person_id = _msg->data;
-		std::cerr<<"This is another person with the id: "<<person_id<<std::endl;
-	}
+  // check whether we are sleeping
+  if(ros::Time::now() - sleepStarted < ros::Duration(20)) {
+    return;
+  }
+
+  if(person_last_id == _msg->personId) {
+    person_counter++;
+    std::cerr<<"Seen person " << person_last_id<<" now " <<person_counter<<" times."<<std::endl;
+  } else {
+    person_counter=1;
+  }
+  person_last_id = _msg->personId;
+
+  if(person_counter > 3) {
+  	if( person_id != _msg->personId )
+	  {
+		  new_task = true;
+		  person_id = _msg->personId;
+		  std::cerr<<"This is another person with the id: "<<person_id<<std::endl;
+	  }
+  }
 }
 
 void Controller::update()
@@ -108,26 +144,32 @@ void Controller::update()
 	if (new_task)
 	{
 		new_task = false;
-		// update our people memory
-		updatePersonSeen(person_id);
-
 		std::cerr<<"Let's stop here for a while..."<<std::endl;
 		rnd_walk_stop.call(srv);
 
-    std::cerr<<"Look at this!"<<std::endl;
+    std::cerr<<"Look at this *gaze*!"<<std::endl;
 		startGaze();
-		std::cerr<<"I feel active..."<<std::endl;
+		std::cerr<<"I feel active...*talk*"<<std::endl;
 		startDialog();		
+
+		// update our people memory
+		updatePersonSeen(person_id);
 		
+    std::cerr<<"Stop staring ... this is embarassing."<<std::endl;
 		ac_gaze.cancelAllGoals();
-		std::cerr<<"I would like to start roaming again..."<<std::endl;
+		std::cerr<<"I would like to start roaming again!"<<std::endl;
 		rnd_walk_start.call(srv);
+
+    // discard perception from now on
+    sleepStarted = ros::Time::now();
 	}
 }
 
 void Controller::updatePersonSeen(const int & _person_id) {
+  memory_ppl[_person_id]++; // initializes to 1 or increases by one
+
 	// check whether that person exists in the memory
-	std::map<int,int>::iterator it;
+	/* std::map<int,int>::iterator it;
 	it = memory_ppl.find(_person_id);
 	if(it != memory_ppl.end()) {
 		// increase it for a known user
@@ -137,7 +179,7 @@ void Controller::updatePersonSeen(const int & _person_id) {
 		// init new user
 		std::cerr<<"This is a new person to me."<<std::endl;
 		memory_ppl[_person_id] = 1;
-	}
+	} */
 }
 
 void Controller::fillDictionary() {

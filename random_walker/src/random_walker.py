@@ -60,7 +60,7 @@ class topol_nav_client(object):
 
 class random_walker(object):
     def __init__(self, names) :
-        self._running = True
+        self._running = False
         self._action = topol_nav_client()
         self._names = names
         self._start_server = rospy.Service('/start_random_walk', Empty, self._start_random_walk)
@@ -68,10 +68,12 @@ class random_walker(object):
 
     def _start_random_walk(self, req):
         self._running = True
+        return EmptySrvResponse()
         
     def _stop_random_walk(self, req):
         self._running = False
         self._action.cancle_action()
+        return EmptySrvResponse()
         
     def run(self):
         while not rospy.is_shutdown():
@@ -80,7 +82,7 @@ class random_walker(object):
                     print 'going to ', name
                     self._action.call_action(name)
                     if self._running:
-                        rospy.sleep(10.0)
+                        rospy.sleep(1.0)
                 else:
                     rospy.sleep(1.0)
 
