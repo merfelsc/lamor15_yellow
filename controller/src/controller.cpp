@@ -139,7 +139,9 @@ void Controller::update()
   if(!initialized) {
     rnd_walk_start.call(srv);
     initialized=true; // will never bet to false again
-  }
+    std::cerr<<"Look at this *gaze*!"<<std::endl;
+		startGaze();
+}
 
 	if (new_task)
 	{
@@ -147,8 +149,7 @@ void Controller::update()
 		std::cerr<<"Let's stop here for a while..."<<std::endl;
 		rnd_walk_stop.call(srv);
 
-    std::cerr<<"Look at this *gaze*!"<<std::endl;
-		startGaze();
+
 		std::cerr<<"I feel active...*talk*"<<std::endl;
 		startDialog();		
 
@@ -156,8 +157,8 @@ void Controller::update()
 		updatePersonSeen(person_id);
 		
     std::cerr<<"Stop staring ... this is embarassing."<<std::endl;
-		ac_gaze.cancelAllGoals();
-		std::cerr<<"I would like to start roaming again!"<<std::endl;
+		//ac_gaze.cancelAllGoals();
+		std::cerr<<"I would like to start roaming again..."<<std::endl;
 		rnd_walk_start.call(srv);
 
     // discard perception from now on
