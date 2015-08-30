@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(talker)
+project(controller)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -116,24 +116,24 @@ catkin_package(
 include_directories(${catkin_INCLUDE_DIRS})
 
 ## Declare a C++ library
-# add_library(talker
-#   src/${PROJECT_NAME}/talker.cpp
+# add_library(controller
+#   src/${PROJECT_NAME}/controller.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(talker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(talker src/talker.cpp)
+add_executable(controller src/controller.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(talker_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(controller_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(talker
+ target_link_libraries(controller
    ${catkin_LIBRARIES}
  )
 
@@ -152,7 +152,7 @@ add_executable(talker src/talker.cpp)
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS talker talker_node
+# install(TARGETS controller controller_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -177,7 +177,7 @@ add_executable(talker src/talker.cpp)
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_talker.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_controller.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
