@@ -27,7 +27,7 @@ tmux select-window -t $SESSION:1
 tmux send-keys "DISPLAY=:0 roslaunch mongodb_store mongodb_store.launch db_path:=$HOME/mongodb_lamor"
 
 tmux select-window -t $SESSION:2
-tmux send-keys "DISPLAY=:0 roslaunch strands_bringup strands_robot.launch with_mux:=false"
+tmux send-keys "DISPLAY=:0 roslaunch strands_bringup strands_robot.launch with_mux:=false with_magnetic_barrier:=false"
 
 tmux select-window -t $SESSION:3
 tmux send-keys "DISPLAY=:0 roslaunch strands_bringup strands_cameras.launch head_camera:=true head_ip:=$HEAD_PC head_user:=lamor chest_camera:=true chest_ip:=$CHEST_PC chest_user:=lamor"
