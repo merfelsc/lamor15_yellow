@@ -6,9 +6,9 @@ import random
 from urllib2 import Request, urlopen, unquote
 from facts.srv import *
 
-facts = [ 'The first tanks were built in Lincoln [Wikipedia]', 
-          'The earliest origins of Lincoln can be traced to the remains of an Iron Age settlement of round wooden dwellings [Wikipedia]',
-          'The robot Bob tells jocks but they are not that funny' ]
+facts = [ 'The first tanks were built in Lincoln.', 
+          'The earliest origins of Lincoln can be traced to the remains of an Iron Age settlement of round wooden dwellings.',
+          'The robot Bob tells jocks but they are not that funny.' ]
 
 history = {}
 
