@@ -108,6 +108,7 @@ void Controller::update()
 		std::cerr<<"Let's stop here for a while..."<<std::endl;
 		rnd_walk_stop.call(srv);
 
+    std::cerr<<"Look at this!"<<std::endl;
 		startGaze();
 		std::cerr<<"I feel active..."<<std::endl;
 		startDialog();		
@@ -148,13 +149,15 @@ int main(int argc, char** argv)
 	
 	ros::Rate loop_rate(5); // [Hz]
 
-    while(ros::ok())
-    {
+	rnd_walk_start.call(srv);
+
+  while(ros::ok())
+  {
 		theController.update();
     	
 		ros::spinOnce();
-        loop_rate.sleep();
-    }
+    loop_rate.sleep();
+  }
 
-    return 0;
+  return 0;
 }
