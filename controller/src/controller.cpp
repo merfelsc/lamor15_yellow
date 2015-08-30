@@ -36,7 +36,13 @@ void Controller::startDialog()
 	std::map<int,int>::iterator it_count;
 	it_count = memory_ppl.find(person_id);
 	if(it_count != memory_ppl.end()) {
-		ss << "We have already met " << it_count->second << " times before.";
+		ss << "We have already met " << it_count->second;
+    if(it_count->second == 1) {
+      ss<<"time";
+    } else {
+      ss<<"times";
+    }
+    ss << " before.";
 
     if(it_count->second == 3) {
       // tell him about the weather
@@ -101,18 +107,19 @@ void Controller::startGaze()
 void Controller::tagSubscriber(const circle_detection::detection_results_array::ConstPtr& _msg)
 {
   // check whether we are sleeping
-  if(ros::Time::now() - sleepStarted < ros::Duration(30)) {
+  if(ros::Time::now() - sleepStarted < ros::Duration(20)) {
     return;
   }
 
   if(person_last_id == _msg->personId) {
     person_counter++;
+    std::cerr<<"Seen person " << person_last_id<<" now " <<person_counter<<" times."<<std::endl;
   } else {
     person_counter=1;
   }
   person_last_id = _msg->personId;
 
-  if(person_counter > 5) {
+  if(person_counter > 3) {
   	if( person_id != _msg->personId )
 	  {
 		  new_task = true;
