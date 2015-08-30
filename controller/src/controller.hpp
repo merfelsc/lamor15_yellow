@@ -25,6 +25,8 @@ class Controller
 private:
 	ros::NodeHandle n;
 	int person_id;
+	int person_last_id;
+  int person_counter;
 	ros::Subscriber name_tag_sub;
 
 	actionlib::SimpleActionClient<mary_tts::maryttsAction> ac_speak;

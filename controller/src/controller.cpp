@@ -1,7 +1,7 @@
 #include <sstream>
 #include "controller.hpp"
 
-Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("/tell_facts")), initialized(false), client_weather(n.serviceClient<weather::TellWeather>("/tell_weather"))
+Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("/tell_facts")), initialized(false), client_weather(n.serviceClient<weather::TellWeather>("/tell_weather")), person_counter(0), person_last_id(-1)
 {
 	name_tag_sub = n.subscribe<circle_detection::detection_results_array>("/circle_detection/results_array", 1000, &Controller::tagSubscriber, this);
 
@@ -100,12 +100,21 @@ void Controller::startGaze()
 
 void Controller::tagSubscriber(const circle_detection::detection_results_array::ConstPtr& _msg)
 {
-	if( person_id != _msg->personId )
-	{
-		new_task = true;
-		person_id = _msg->personId;
-		std::cerr<<"This is another person with the id: "<<person_id<<std::endl;
-	}
+  if(person_last_id == _msg->personId) {
+    person_counter++;
+  } else {
+    person_counter=1;
+  }
+  person_last_id = _msg->personId;
+
+  if(person_counter > 5) {
+  	if( person_id != _msg->personId )
+	  {
+		  new_task = true;
+		  person_id = _msg->personId;
+		  std::cerr<<"This is another person with the id: "<<person_id<<std::endl;
+	  }
+  }
 }
 
 void Controller::update()
