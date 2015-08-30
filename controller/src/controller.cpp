@@ -44,6 +44,7 @@ void Controller::startDialog()
     if(client_facts.call(srv)) {
       // we got a new fact
       std::cerr<<"Received a new fact: " << srv.response.fact << std::endl;
+      ss << "Fact: ";
       ss << srv.response.fact << std::endl;
     } else {
       std::cerr<<"Did not receive a new fact."<<std::endl;
@@ -77,7 +78,7 @@ void Controller::startGaze()
 	goal.topic_name = "/upper_body_detector/closest_bounding_box_centre";	
   	ac_gaze.sendGoal(goal);
 
-	bool finished_before_timeout = ac_gaze.waitForResult(ros::Duration(10.0));
+	bool finished_before_timeout = ac_gaze.waitForResult(ros::Duration(1.0));
 	if (finished_before_timeout)
 	{
 	  actionlib::SimpleClientGoalState state = ac_gaze.getState();
@@ -108,9 +109,6 @@ void Controller::update()
 	if (new_task)
 	{
 		new_task = false;
-		// update our people memory
-		updatePersonSeen(person_id);
-
 		std::cerr<<"Let's stop here for a while..."<<std::endl;
 		rnd_walk_stop.call(srv);
 
@@ -118,7 +116,11 @@ void Controller::update()
 		startGaze();
 		std::cerr<<"I feel active..."<<std::endl;
 		startDialog();		
+
+		// update our people memory
+		updatePersonSeen(person_id);
 		
+    std::cerr<<"Stop staring ... this is embarassing."<<std::endl;
 		ac_gaze.cancelAllGoals();
 		std::cerr<<"I would like to start roaming again..."<<std::endl;
 		rnd_walk_start.call(srv);
