@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <launch>
     
-    <arg name="image_input_topic" default="/BETTYS_CAMERA/image_raw" />
+    <arg name="image_input_topic" default="/head_xtion/rgb/image_raw" />
     <arg name="image_output_topic" default="/circle_detection/output" />
-    <arg name="camera_info" default="/BETTYS_CAMERA/camera_info" />
+    <arg name="camera_info" default="/head_xtion/rgb/camera_info" />
     <arg name="results_topic" default="/circle_detection/results_array" />
     <arg name="marker_topic" default="/circle_detection/marker_array" />
     

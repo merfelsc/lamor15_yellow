@@ -13,7 +13,10 @@
 #include <actionlib/client/terminal_state.h>
 #include <mary_tts/maryttsAction.h>
 #include <strands_gazing/GazeAtPoseAction.h>
+#include <facts/TellFacts.h>
 
+#include "circle_detection/detection_results.h"
+#include "circle_detection/detection_results_array.h"
 
 
 class Controller
@@ -27,15 +30,17 @@ private:
 	actionlib::SimpleActionClient<strands_gazing::GazeAtPoseAction> ac_gaze;
 	ros::ServiceClient rnd_walk_start;
 	ros::ServiceClient rnd_walk_stop;
+	ros::ServiceClient client_facts; // for asking for facts
 	bool new_task;
 	std::map<int,int> memory_ppl; // key: person_id, value: number of times seen
 	std::map<int,std::string> name_dict; // dictionary for peoples' name
+    bool initialized;
 
 public:
 	Controller();
 	void startDialog();
 	void startGaze();
-	void tagSubscriber(const std_msgs::Int32::ConstPtr& _msg);
+	void tagSubscriber(const circle_detection::detection_results_array::ConstPtr& _msg);
 	void update();
 	~Controller(){};
 

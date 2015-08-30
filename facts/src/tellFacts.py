@@ -2,15 +2,13 @@
 
 import rospy
 import random
-import socket
 
 from urllib2 import Request, urlopen
 from facts.srv import *
 
-socket.setdefaulttimeout(1)
-
-facts = [ 'Fact 1', 
-          'Fact 2' ]
+facts = [ 'The first tanks were built in Lincoln [Wikipedia]', 
+          'The earliest origins of Lincoln can be traced to the remains of an Iron Age settlement of round wooden dwellings [Wikipedia]',
+          'The robot Bob tells jocks but they are not that funny' ]
 
 history = {}
 
