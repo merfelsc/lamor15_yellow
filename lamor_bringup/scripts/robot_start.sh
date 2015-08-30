@@ -14,7 +14,6 @@ tmux new-window -t $SESSION:6 -n 'ppl_perception'
 #tmux new-window -t $SESSION:7 -n 'scheduler'
 #tmux new-window -t $SESSION:8 -n 'control'
 #New windows:
-tmux new-window -t $SESSION:7 -n 'mary'
 tmux new-window -t $SESSION:8 -n 'facts'
 tmux new-window -t $SESSION:9 -n 'weather'
 tmux new-window -t $SESSION:10 -n 'random_walk' 
@@ -47,9 +46,6 @@ tmux send-keys "DISPLAY=:0 roslaunch lamor_bringup lamor_navigation.launch chest
 
 tmux select-window -t $SESSION:6
 tmux send-keys "DISPLAY=:0 roslaunch perception_people_launch people_tracker_robot.launch machine:=$HEAD_PC user:=lamor"
-
-tmux select-window -t $SESSION:7
-tmux send-keys "DISPLAY=:0 roslaunch mary_tts ros_mary.launch"
 
 tmux select-window -t $SESSION:8
 tmux send-keys "DISPLAY=:0 rosrun facts tellFacts.py"
