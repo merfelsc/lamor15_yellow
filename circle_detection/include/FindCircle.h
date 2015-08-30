@@ -27,8 +27,8 @@
 #include <algorithm>
 #include <vector>
 
-#define MAX_PATTERNS 5
-#define NUM_CIRCLES 5
+#define MAX_PATTERNS 4
+#define NUM_CIRCLES 4
 
 struct COMPARE_CIRCLE {
 	bool operator() (SSegment i,SSegment j) {
