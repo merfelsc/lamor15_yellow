@@ -1,7 +1,7 @@
 #include <sstream>
 #include "controller.hpp"
 
-Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("/tell_facts")), initialized(false)
+Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("/tell_facts")), initialized(false), client_weather(n.serviceClient<weather::TellWeather>("/tell_weather"))
 {
 	name_tag_sub = n.subscribe<circle_detection::detection_results_array>("/circle_detection/results_array", 1000, &Controller::tagSubscriber, this);
 
@@ -38,16 +38,28 @@ void Controller::startDialog()
 	if(it_count != memory_ppl.end()) {
 		ss << "We have already met " << it_count->second << " times before.";
 
-    // query the facts service
-    facts::TellFacts srv;
-    srv.request.person = person_id;
-    if(client_facts.call(srv)) {
-      // we got a new fact
-      std::cerr<<"Received a new fact: " << srv.response.fact << std::endl;
-      ss << "Fact: ";
-      ss << srv.response.fact << std::endl;
+    if(it_count->second == 3) {
+      // tell him about the weather
+      weather::TellWeather srv;
+      if(client_weather.call(srv)) {
+        // we got a new weather update
+        std::cerr<<"Received a new weather update: " << srv.response.weather << std::endl;
+        ss << srv.response.weather << std::endl;
+      } else {
+        std::cerr<<"Did not receive a new weather update."<<std::endl;
+      }
     } else {
-      std::cerr<<"Did not receive a new fact."<<std::endl;
+      // query the facts service
+      facts::TellFacts srv;
+      srv.request.person = person_id;
+      if(client_facts.call(srv)) {
+        // we got a new fact
+        std::cerr<<"Received a new fact: " << srv.response.fact << std::endl;
+        ss << "Fact: ";
+        ss << srv.response.fact << std::endl;
+      } else {
+        std::cerr<<"Did not receive a new fact."<<std::endl;
+      }
     }
 	} else {
 		ss << " Welcome to the E C M R.";
