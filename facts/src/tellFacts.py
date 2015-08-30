@@ -8,7 +8,9 @@ from facts.srv import *
 
 facts = [ 'The first tanks were built in Lincoln.', 
           'The earliest origins of Lincoln can be traced to the remains of an Iron Age settlement of round wooden dwellings.',
-          'The robot Bob tells jocks but they are not that funny.' ]
+          'The robot Bob tells jocks but they are not that funny.',
+          'Lincoln is the only place in the world where you can find an original copy of Magna Carta together with the Charter of the Forest, issued in 1217 to amplify the document and one of only two surviving copies.',
+          'Did you know that George Boole was born in Lincolnshire?' ]
 
 history = {}
 
