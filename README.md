@@ -7,3 +7,5 @@ This is the repository of the yellow team.
 Please see the [Wiki](https://github.com/strands-project/lamor15/wiki) for details.
 
 
+To demostrate circle_detection on laptops, first clone to usb_cam repository.
+$ git clone git@github.com:bosch-ros-pkg/usb_cam
