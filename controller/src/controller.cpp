@@ -27,7 +27,7 @@ void Controller::startDialog()
 	if(it != name_dict.end()) {
 		name = it->second;
 	} else {
-		name = "unknown person. I do not recognize you"; // start an alarm?
+		name = "you"; // start an alarm?
 	}
 
 	ss << "Hi " << name << ".";
@@ -145,9 +145,9 @@ void Controller::update()
 		std::cerr<<"Let's stop here for a while..."<<std::endl;
 		rnd_walk_stop.call(srv);
 
-    std::cerr<<"Look at this!"<<std::endl;
+    std::cerr<<"Look at this *gaze*!"<<std::endl;
 		startGaze();
-		std::cerr<<"I feel active..."<<std::endl;
+		std::cerr<<"I feel active...*talk*"<<std::endl;
 		startDialog();		
 
 		// update our people memory
@@ -155,7 +155,7 @@ void Controller::update()
 		
     std::cerr<<"Stop staring ... this is embarassing."<<std::endl;
 		ac_gaze.cancelAllGoals();
-		std::cerr<<"I would like to start roaming again..."<<std::endl;
+		std::cerr<<"I would like to start roaming again!"<<std::endl;
 		rnd_walk_start.call(srv);
 
     // discard perception from now on
@@ -164,8 +164,10 @@ void Controller::update()
 }
 
 void Controller::updatePersonSeen(const int & _person_id) {
+  memory_ppl[_person_id]++; // initializes to 1 or increases by one
+
 	// check whether that person exists in the memory
-	std::map<int,int>::iterator it;
+	/* std::map<int,int>::iterator it;
 	it = memory_ppl.find(_person_id);
 	if(it != memory_ppl.end()) {
 		// increase it for a known user
@@ -175,7 +177,7 @@ void Controller::updatePersonSeen(const int & _person_id) {
 		// init new user
 		std::cerr<<"This is a new person to me."<<std::endl;
 		memory_ppl[_person_id] = 1;
-	}
+	} */
 }
 
 void Controller::fillDictionary() {
