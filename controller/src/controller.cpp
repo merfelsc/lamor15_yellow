@@ -1,7 +1,7 @@
 #include <sstream>
 #include "controller.hpp"
 
-Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("/tell_facts")), initialized(false), client_weather(n.serviceClient<weather::TellWeather>("/tell_weather")), person_counter(0), person_last_id(-1)
+Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("/tell_facts")), initialized(false), client_weather(n.serviceClient<weather::TellWeather>("/tell_weather")), person_counter(0), person_last_id(-1), sleepStarted(ros::Time::now() - ros::Duration(30))
 {
 	name_tag_sub = n.subscribe<circle_detection::detection_results_array>("/circle_detection/results_array", 1000, &Controller::tagSubscriber, this);
 
@@ -100,6 +100,11 @@ void Controller::startGaze()
 
 void Controller::tagSubscriber(const circle_detection::detection_results_array::ConstPtr& _msg)
 {
+  // check whether we are sleeping
+  if(ros::Time::now() - sleepStarted < ros::Duration(30)) {
+    return;
+  }
+
   if(person_last_id == _msg->personId) {
     person_counter++;
   } else {
@@ -145,6 +150,9 @@ void Controller::update()
 		ac_gaze.cancelAllGoals();
 		std::cerr<<"I would like to start roaming again..."<<std::endl;
 		rnd_walk_start.call(srv);
+
+    // discard perception from now on
+    sleepStarted = ros::Time::now();
 	}
 }
 
