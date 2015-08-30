@@ -22,6 +22,7 @@ void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
         ROS_DEBUG("Readjusting image format from %ix%i %ibpp, to %ix%i %ibpp.", image->width, image->height, image->bpp, msg->width, msg->height, msg->step / msg->width);
         image = new CRawImage(msg->width, msg->height, msg->step / msg->width);
     }
+    
 
     memcpy(image->data, (void*) &msg->data[0], msg->step * msg->height);
 
@@ -55,7 +56,7 @@ void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 
 	// Sanity check: compare the second line's orientation
 	// Get the angle from 3rd circle to 4th circle
-	double angle_check = angleBetweenCircles( *(circles.begin()+2), *(circles.begin()+3) );
+	double angle_check = angleBetweenCircles( *(circles.begin()+3), *(circles.begin()+4) );
 	if (abs(angle_offset-angle_check)>ANGLE_THRLD_RATE) {
 		std::cout << "second line doesn't allign!" << std::endl;
 		return;
