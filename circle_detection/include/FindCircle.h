@@ -26,15 +26,22 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <utility>
 
-#define MAX_PATTERNS 4
-#define NUM_CIRCLES 4
+#define MAX_PATTERNS 5
+#define NUM_CIRCLES 5
 
-struct COMPARE_CIRCLE {
+struct COMPARE_CIRCLE_BWRATE {
 	bool operator() (SSegment i,SSegment j) {
 		return i.bwRatio>j.bwRatio;
 	} //Compare two SSegment by their bwRatio
-} compare_circle;
+} compare_circle_bwratio;
+
+struct COMPARE_CIRCLE_POSITION {
+	bool operator() (SSegment i,SSegment j) {
+		return i.angleToRef<j.angleToRef;
+	} //Compare two SSegment by their angleToRef
+} compare_circle_pos;
 
 class FindCircle {
 public:

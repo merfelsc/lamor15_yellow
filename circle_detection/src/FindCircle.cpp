@@ -3,6 +3,13 @@
 #define ONE_ROUND_RADIAN (2*M_PI)
 #define ANGLE_THRLD_RATE (0.1*ONE_ROUND_RADIAN)
 
+
+std::string FindCircle::generateUUID(std::string time, int id) {
+    boost::uuids::name_generator gen(dns_namespace_uuid);
+    time += num_to_str<int>(id);
+    return num_to_str<boost::uuids::uuid>(gen(time.c_str()));
+}
+
 // Compute the orientation (in radian) of the vector from start to end circle
 double angleBetweenCircles(const SSegment &start, const SSegment &end) {
 	double del_x = end.x - start.x ;
@@ -10,10 +17,61 @@ double angleBetweenCircles(const SSegment &start, const SSegment &end) {
 	return atan2(del_y,del_x);
 }
 
-std::string FindCircle::generateUUID(std::string time, int id) {
-    boost::uuids::name_generator gen(dns_namespace_uuid);
-    time += num_to_str<int>(id);
-    return num_to_str<boost::uuids::uuid>(gen(time.c_str()));
+// Compute the orientation (in radian) of the vector from start to end points
+double angleBetweenPts(const std::pair<float,float> &start, const std::pair<float,float> &end) {
+	double del_x = end.first - start.first ;
+	double del_y = end.second - start.second ;
+// 	std::cout << del_x << ", " << del_y << std::endl;
+	double rtn = atan2(del_y,del_x);
+	return (rtn>=0)? rtn : rtn+ONE_ROUND_RADIAN;
+}
+
+std::pair<int,int> largestDistIndices(const std::vector<SSegment> &circles) {
+	std::pair<int,int> rtn;
+	double maxDist = -INFINITY;
+	for (int i = 0; i < circles.size() - 1; i++) {
+		for (int j = i + 1; j < circles.size(); j++) {
+			int distX = std::pow((circles[j].x - circles[i].x), 2);
+			int distY = std::pow((circles[j].y - circles[i].y), 2);
+			double calcdistance = sqrt(distX + distY);
+			if (calcdistance > maxDist) {
+				maxDist = calcdistance;
+				rtn = std::pair<int,int>(i,j);
+			}
+		}
+	}
+	return rtn;
+}
+
+int closestCircleIx(const std::vector<SSegment> &circles, const float x, const float y) {
+	int ix = -1;
+    double minDist = INFINITY;
+    for (int i = 0; i < circles.size(); i++) {
+		double distX = std::pow((circles[i].x - x), 2);
+		double distY = std::pow((circles[i].y - y), 2);
+		double calcdistance = sqrt(distX + distY);
+		if (calcdistance < minDist) {
+			ix = i;
+			minDist = calcdistance;
+		}
+    }
+    return ix;
+}
+
+std::pair<float,float> midPoint(const std::vector<SSegment> &circles, const std::pair<int,int> &circleIx) {
+	float middleX = ((circles[circleIx.first].x + circles[circleIx.second].x) / 2);
+	float middleY = ((circles[circleIx.first].y + circles[circleIx.second].y) / 2);
+	return std::pair<float,float>(middleX,middleY);
+}
+
+std::pair<float,float> midPoint(const std::vector<SSegment> &circles) {
+	float sumX = 0.f;
+	float sumY = 0.f;
+	for (std::vector<SSegment>::const_iterator it=circles.begin(); it!=circles.end(); ++it) {
+		sumX += it->x;
+		sumY += it->y;
+	}
+	return std::pair<float,float>(sumX/circles.size(),sumY/circles.size());
 }
 
 void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
@@ -47,19 +105,34 @@ void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 	
     std::cout << "--" << std::endl;
 	
+	std::pair<int,int> firstAndThirdCircles = largestDistIndices(circles);
+	std::pair<float,float> midXYFirstAndThird = midPoint(circles, firstAndThirdCircles);
+	std::pair<float,float> midXYRef = midPoint(circles);
+	double refAngle = angleBetweenPts(midXYFirstAndThird,midXYRef) - 0.5*M_PI ;
+	if (refAngle<0) refAngle += ONE_ROUND_RADIAN;
+	
+	std::cout << refAngle/M_PI*180 << std::endl;
+
+	for (std::vector<SSegment>::iterator it=circles.begin(); it!=circles.end(); ++it) {
+		std::cout << it->y << ", ";
+		double angleToRef = angleBetweenPts(std::pair<float,float>(it->x,it->y),midXYRef) - refAngle;
+		it->angleToRef = (angleToRef>=0)? angleToRef : angleToRef+ONE_ROUND_RADIAN;
+	}
+	std::cout << std::endl;
+	
 	// Sort the detected circles according to the bwRatio
-	std::sort(circles.begin(),circles.end(),compare_circle);
+	std::sort(circles.begin(),circles.end(),compare_circle_pos);
 	
 	// Get the angle from 0th circle to 2nd circle
 	const double angle_offset = angleBetweenCircles( *(circles.begin()), *(circles.begin()+1) );
 
-	// Sanity check: compare the second line's orientation
-	// Get the angle from 3rd circle to 4th circle
-	double angle_check = angleBetweenCircles( *(circles.begin()+2), *(circles.begin()+3) );
-	if (abs(angle_offset-angle_check)>ANGLE_THRLD_RATE) {
-		std::cout << "second line doesn't allign!" << std::endl;
-		return;
-	}
+// 	// Sanity check: compare the second line's orientation
+// 	// Get the angle from 3rd circle to 4th circle
+// 	double angle_check = angleBetweenCircles( *(circles.begin()+3), *(circles.begin()+4) );
+// 	if (abs(angle_offset-angle_check)>ANGLE_THRLD_RATE) {
+// 		std::cout << "second line doesn't allign!" << std::endl;
+// 		return;
+// 	}
 	
 	int i =0;
 	int personId = 0;
@@ -67,6 +140,8 @@ void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 		double angle = (((*it).angle-angle_offset)/M_PI+1)/2*numCommands;
 		int digit = (int)(floor(angle+0.5)+2) % numCommands;
 		personId += digit * pow(4,i);
+		
+		std::cout << i << ": " << it->angleToRef/M_PI*180 << " " << it->bwRatio << " " << digit << std::endl;
 		
 		STrackedObject sTrackedObject = trans->transform(*it);
 		// Filter error values

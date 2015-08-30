@@ -27,6 +27,7 @@ typedef struct{
 	bool valid;
 	float m0,m1;
 	float v0,v1;
+	float angleToRef;
 }SSegment;
 
 class CCircleDetect
