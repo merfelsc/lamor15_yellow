@@ -3,7 +3,7 @@
 import rospy
 import random
 
-from urllib2 import Request, urlopen
+from urllib2 import Request, urlopen, unquote
 from facts.srv import *
 
 facts = [ 'The first tanks were built in Lincoln [Wikipedia]', 
@@ -22,7 +22,8 @@ def handle_facts_req(req):
     if pid in history and len(history[pid]) == 0:
         # never eval arbitrary website content ;)
         try:
-            joke = eval(urlopen('http://api.icndb.com/jokes/random', None, 1).read())['value']['joke']
+            joke = unquote(eval(urlopen('http://api.icndb.com/jokes/random', None, 1).read())['value']['joke'])
+            joke = joke.replace('&quot;', '"')
             return TellFactsResponse(joke)
         except:
             pass
