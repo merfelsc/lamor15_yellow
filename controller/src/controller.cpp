@@ -76,10 +76,12 @@ void Controller::startDialog()
 	}	
 
 	mary_tts::maryttsGoal goal;
-  	goal.text = ss.str();
-  	ac_speak.sendGoal(goal);
+ 	goal.text = ss.str();
+  std::cerr<<"<speaking>...";
+ 	ac_speak.sendGoal(goal);
 
-	bool finished_before_timeout = ac_speak.waitForResult(ros::Duration(30.0));
+	bool finished_before_timeout = ac_speak.waitForResult(ros::Duration(15.0));
+  std::cerr<<"</speaking>"<<std::endl;
 	if (finished_before_timeout)
 	{
 	  actionlib::SimpleClientGoalState state = ac_speak.getState();
@@ -92,9 +94,9 @@ void Controller::startGaze()
 	ac_gaze.waitForServer();
 
 	strands_gazing::GazeAtPoseGoal goal;
-  	goal.runtime_sec = 0;
+	goal.runtime_sec = 0;
 	goal.topic_name = "/upper_body_detector/closest_bounding_box_centre";	
-  	ac_gaze.sendGoal(goal);
+  ac_gaze.sendGoal(goal);
 
 	bool finished_before_timeout = ac_gaze.waitForResult(ros::Duration(1.0));
 	if (finished_before_timeout)
