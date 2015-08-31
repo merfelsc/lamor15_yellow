@@ -40,6 +40,7 @@ private:
 	std::map<int,std::string> name_dict; // dictionary for peoples' name
     bool initialized;
   ros::Time sleepStarted;
+  	ros::Rate speek_rate_;
 
 public:
 	Controller();
