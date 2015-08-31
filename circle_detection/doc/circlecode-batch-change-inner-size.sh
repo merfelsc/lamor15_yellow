@@ -1,10 +1,10 @@
-convert -size 598x398 xc:white -bordercolor black -border 1 a.png 
+convert -size 648x398 xc:white -bordercolor black -border 1 a.png 
 
-num_circle=4;
-num_circle_per_row=2;
+num_circle=5;
+num_circle_per_row=3;
 r_outer=90;
-r_inner_max=40;
-r_inner_min=25;
+r_inner_max=35;
+r_inner_min=35;
 r_inner_del=$((($r_inner_max-$r_inner_min)/($num_circle-1)));
 
 # Black circles
@@ -27,6 +27,12 @@ for i in $(seq 0 $(($num_circle-1)));do
 		sa=$((2*($ax/2)-1))
 	fi
 	r_inner=$(($r_inner_min+$r_inner_del*i));
-	echo $r_inner
-	convert a.png -stroke white -fill white -draw "ellipse $((($i%$num_circle_per_row)*220+115+115*($i/$num_circle_per_row)+$ca*20)),$(((115+180*($i/$num_circle_per_row))+$sa*20)) $r_inner,$r_inner 0,360" a.png;
+	
+	if [[ $i > 2 ]]; then
+		# Shift
+		xOffset=$(($i%$(($num_circle_per_row-1))))
+		convert a.png -stroke white -fill white -draw "ellipse $(($xOffset*220+115+115*($i/$num_circle_per_row)+$ca*20)),$(((115+180*($i/$num_circle_per_row))+$sa*20)) $r_inner,$r_inner 0,360" a.png;
+	else
+		convert a.png -stroke white -fill white -draw "ellipse $((($i%$num_circle_per_row)*220+115+115*($i/$num_circle_per_row)+$ca*20)),$(((115+180*($i/$num_circle_per_row))+$sa*20)) $r_inner,$r_inner 0,360" a.png;
+	fi
 done
