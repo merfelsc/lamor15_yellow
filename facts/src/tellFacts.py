@@ -10,24 +10,18 @@ from facts.srv import *
 facts = [ 'The first tanks were built in Lincoln. Interesting, right?', 
           'The earliest origins of Lincoln can be traced to the remains of an Iron Age settlement of round wooden dwellings.',
           'The robot Bob tells really bad jokes, so keep closer to me.',
-          'the green robot is hiding a death ray in this eyes. Keep close to me
-          so that I can protect you.',
+          'the green robot is hiding a death ray in this eyes. Keep close to me so that I can protect you.',
           'Lincoln is the only place in the world where you can find an original copy of Magna Carta together with the Charter of the Forest.',
-          'George Boole was born in Lincolnshire?i I consider him one of my
-          fathers.',
+          'George Boole was born in Lincolnshire?i I consider him one of my fathers.',
           'During the 13th century, Lincoln was the third largest city in England.',
-          'Isaac Newton was born in Lincolnshire? He is the one who invented
-          gravity, you know?',
+          'Isaac Newton was born in Lincolnshire? He is the one who invented gravity, you know?',
           'there are three radio stations in Lincolnshire.',
-          'in the UK it was illegal to eat mince pies on Christmas Day. I dont
-          mind them, I feed on electricity anyways.',
+          'in the UK it was illegal to eat mince pies on Christmas Day. I dont mind them, I feed on electricity anyways.',
           'dying is illegal in the Houses of Parliaments.',
-          'the elephant is the only mammal which can not jump. I also cant jump.
-          Sad story.',
+          'the elephant is the only mammal which can not jump. I also cant jump. Sad story.',
           'it is physically impüossible for pigs to look up into the sky.',
           "duck's quack doesn't echo, and no one knows why.",
-          'every year about 98% of atoms in your body are replaced. We robots
-          are so much cooler.',
+          'every year about 98% of atoms in your body are replaced. We robots are so much cooler.',
           'there is a city called Rome on every continent.' ]
 
 history = {}
