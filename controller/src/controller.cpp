@@ -1,7 +1,7 @@
 #include <sstream>
 #include "controller.hpp"
 
-Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("/tell_facts")), initialized(false), client_weather(n.serviceClient<weather::TellWeather>("/tell_weather")), person_counter(0), person_last_id(-1), sleepStarted(ros::Time::now() - ros::Duration(30))
+Controller::Controller(): n("~"), new_task(false), ac_speak("/speak", true), ac_gaze("/gaze_at_pose", true), memory_ppl(), name_dict(), person_id(-1), client_facts(n.serviceClient<facts::TellFacts>("/tell_facts")), initialized(false), client_weather(n.serviceClient<weather::TellWeather>("/tell_weather")), person_counter(0), person_last_id(-1), sleepStarted(ros::Time::now() - ros::Duration(30)), speek_rate_(1./10.)
 {
 	name_tag_sub = n.subscribe<circle_detection::detection_results_array>("/circle_detection/results_array", 1000, &Controller::tagSubscriber, this);
 
@@ -75,6 +75,7 @@ void Controller::startDialog()
 		ss << std::endl;
 	}	
 
+    speek_rate_.reset();
 	mary_tts::maryttsGoal goal;
  	goal.text = ss.str();
   std::cerr<<"<speaking>...";
@@ -87,6 +88,8 @@ void Controller::startDialog()
 	  actionlib::SimpleClientGoalState state = ac_speak.getState();
 	  ROS_INFO("Action finished: %s",state.toString().c_str());
 	}
+	
+	speek_rate_.sleep();
 }
 
 void Controller::startGaze()
