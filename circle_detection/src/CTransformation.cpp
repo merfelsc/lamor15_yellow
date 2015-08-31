@@ -605,7 +605,7 @@ STrackedObject CTransformation::eigen(double data[]) {
     return result;
 }
 
-STrackedObject CTransformation::transform(SSegment segment) {
+STrackedObject CTransformation::transform(SSegment &segment) {
     float x, y, x1, x2, y1, y2, major, minor, v0, v1;
     STrackedObject result;
     //Transform to the Canonical camera coordinates
@@ -654,6 +654,7 @@ STrackedObject CTransformation::transform(SSegment segment) {
     result = eigen(data);
     result.bwratio = segment.bwRatio;
     result.valid = boost::math::isnormal(result.x) && boost::math::isnormal(result.y) && boost::math::isnormal(result.z) && boost::math::isnormal(result.bwratio);
+	result.segment = segment;
     return result;
 }
 

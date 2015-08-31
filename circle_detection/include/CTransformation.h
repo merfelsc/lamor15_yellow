@@ -32,6 +32,7 @@ typedef struct{
 	float error;
 	float esterror;
 	bool valid;
+	SSegment segment;
 }STrackedObject;
 
 typedef struct{
@@ -56,7 +57,7 @@ class CTransformation
 		void transformXY(float *ix,float *iy);
 		void transformXYerr(float *ix,float *iy);
 
-		STrackedObject transform(SSegment segment);
+		STrackedObject transform(SSegment &segment);
 		STrackedObject eigen(double data[]);
 		int calibrate2D(STrackedObject *o,float gridDimX,float gridDimY);
 		int calibrate3D(STrackedObject *o,float gridDimX,float gridDimY);

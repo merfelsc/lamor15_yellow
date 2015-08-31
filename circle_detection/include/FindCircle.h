@@ -28,20 +28,29 @@
 #include <vector>
 #include <utility>
 
-#define MAX_PATTERNS 5
+#define MAX_PATTERNS 20
 #define NUM_CIRCLES 5
 
-struct COMPARE_CIRCLE_BWRATE {
-	bool operator() (SSegment i,SSegment j) {
-		return i.bwRatio>j.bwRatio;
-	} //Compare two SSegment by their bwRatio
-} compare_circle_bwratio;
+#define SEARCH_X	0
+#define SEARCH_Y	0
+#define SEARCH_Z	0.5
 
+/*
 struct COMPARE_CIRCLE_POSITION {
 	bool operator() (SSegment i,SSegment j) {
 		return i.angleToRef<j.angleToRef;
 	} //Compare two SSegment by their angleToRef
 } compare_circle_pos;
+*/
+
+bool circlePositionCompare(const STrackedObject &i,const STrackedObject &j) {
+	return i.segment.angleToRef<j.segment.angleToRef;
+} //Compare two SSegment by their angleToRef
+
+// pair<id,dist>
+bool distCompare(const std::pair<int,double> &i, const std::pair<int,double> &j) {
+	return i.second < j.second;
+}
 
 class FindCircle {
 public:
@@ -76,10 +85,7 @@ private:
     std::clock_t start;
     CRawImage *image;
     CCircleDetect *detectorArray[MAX_PATTERNS];
-    STrackedObject objectArray[MAX_PATTERNS];
-    STrackedObject objectArray3D[MAX_PATTERNS];
     SSegment currentSegmentArray[MAX_PATTERNS];
-    SSegment lastSegmentArray[MAX_PATTERNS];
 
     //3D transform code
     CTransformation *trans;

@@ -10,32 +10,24 @@ std::string FindCircle::generateUUID(std::string time, int id) {
     return num_to_str<boost::uuids::uuid>(gen(time.c_str()));
 }
 
-// Compute the orientation (in radian) of the vector from start to end circle
-double angleBetweenCircles(const SSegment &start, const SSegment &end) {
-	double del_x = end.x - start.x ;
-	double del_y = end.y - start.y ;
-	return atan2(del_y,del_x);
-}
-
-// Compute the orientation (in radian) of the vector from start to end points
+// Compute the orientation (in radian) of the vector from start to end points. In range [0, 2PI)
 double angleBetweenPts(const std::pair<float,float> &start, const std::pair<float,float> &end) {
 	double del_x = end.first - start.first ;
 	double del_y = end.second - start.second ;
-// 	std::cout << del_x << ", " << del_y << std::endl;
 	double rtn = atan2(del_y,del_x);
-	return (rtn>=0)? rtn : rtn+ONE_ROUND_RADIAN;
+	return (rtn>=0)? rtn : rtn+ONE_ROUND_RADIAN; // Turn it to [0, 2PI)
 }
 
-std::pair<int,int> largestDistIndices(const std::vector<SSegment> &circles) {
+std::pair<int,int> largestDistIndices(const std::vector<STrackedObject> &circles) {
 	std::pair<int,int> rtn;
 	double maxDist = -INFINITY;
 	for (int i = 0; i < circles.size() - 1; i++) {
 		for (int j = i + 1; j < circles.size(); j++) {
-			int distX = std::pow((circles[j].x - circles[i].x), 2);
-			int distY = std::pow((circles[j].y - circles[i].y), 2);
-			double calcdistance = sqrt(distX + distY);
-			if (calcdistance > maxDist) {
-				maxDist = calcdistance;
+			int distX = std::pow((circles[j].segment.x - circles[i].segment.x), 2);
+			int distY = std::pow((circles[j].segment.y - circles[i].segment.y), 2);
+			double distSq = distX + distY;
+			if (distSq > maxDist) {
+				maxDist = distSq;
 				rtn = std::pair<int,int>(i,j);
 			}
 		}
@@ -43,33 +35,47 @@ std::pair<int,int> largestDistIndices(const std::vector<SSegment> &circles) {
 	return rtn;
 }
 
-int closestCircleIx(const std::vector<SSegment> &circles, const float x, const float y) {
+int nearest3DObjIx(const std::vector<STrackedObject> &circles, const float x, const float y, const float z) {
 	int ix = -1;
     double minDist = INFINITY;
     for (int i = 0; i < circles.size(); i++) {
 		double distX = std::pow((circles[i].x - x), 2);
 		double distY = std::pow((circles[i].y - y), 2);
-		double calcdistance = sqrt(distX + distY);
-		if (calcdistance < minDist) {
+		double distZ = std::pow((circles[i].z - z), 2);
+		double distSq = distX + distY + distZ;
+		if (distSq < minDist) {
 			ix = i;
-			minDist = calcdistance;
+			minDist = distSq;
 		}
     }
     return ix;
 }
 
-std::pair<float,float> midPoint(const std::vector<SSegment> &circles, const std::pair<int,int> &circleIx) {
-	float middleX = ((circles[circleIx.first].x + circles[circleIx.second].x) / 2);
-	float middleY = ((circles[circleIx.first].y + circles[circleIx.second].y) / 2);
+std::vector<std::pair<int,double> > knn3DObjIx(const std::vector<STrackedObject> &circles, const float x, const float y, const float z) {
+	std::vector<std::pair<int,double> > list;
+    for (int i = 0; i < circles.size(); i++) {
+		double distX = std::pow((circles[i].x - x), 2);
+		double distY = std::pow((circles[i].y - y), 2);
+		double distZ = std::pow((circles[i].z - z), 2);
+		double distSq = distX + distY + distZ;
+		list.push_back(std::pair<int,double>(i,distSq));
+    }
+    std::sort(list.begin(),list.end(),distCompare);
+	return list;
+}
+
+std::pair<float,float> midPoint(const std::vector<STrackedObject> &circles, const std::pair<int,int> &circleIx) {
+	float middleX = ((circles[circleIx.first].segment.x + circles[circleIx.second].segment.x) / 2);
+	float middleY = ((circles[circleIx.first].segment.y + circles[circleIx.second].segment.y) / 2);
 	return std::pair<float,float>(middleX,middleY);
 }
 
-std::pair<float,float> midPoint(const std::vector<SSegment> &circles) {
+std::pair<float,float> midPoint(const std::vector<STrackedObject> &circles) {
 	float sumX = 0.f;
 	float sumY = 0.f;
-	for (std::vector<SSegment>::const_iterator it=circles.begin(); it!=circles.end(); ++it) {
-		sumX += it->x;
-		sumY += it->y;
+	for (std::vector<STrackedObject>::const_iterator it=circles.begin(); it!=circles.end(); ++it) {
+		sumX += it->segment.x;
+		sumY += it->segment.y;
 	}
 	return std::pair<float,float>(sumX/circles.size(),sumY/circles.size());
 }
@@ -87,91 +93,108 @@ void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     tracked_objects.header = msg->header;
     visualization_msgs::MarkerArray marker_list;
 	
-	std::vector<SSegment> circles;
+	std::vector<STrackedObject> circles;
 	
     //search image for circles
     for (int i = 0; i < MAX_PATTERNS; i++) {
-        lastSegmentArray[i] = currentSegmentArray[i];
-        currentSegmentArray[i] = detectorArray[i]->findSegment(image, lastSegmentArray[i]);
+        SSegment lastSegment = currentSegmentArray[i];
+//         currentSegmentArray[i] = detectorArray[i]->findSegment(image, lastSegment);
+        currentSegmentArray[i] = detectorArray[i]->findSegment(image, lastSegment);
         if (currentSegmentArray[i].valid) {
-			circles.push_back(currentSegmentArray[i]);
+			STrackedObject sTrackedObject = trans->transform(currentSegmentArray[i]);
+			// Filter error values
+			if (isnan(sTrackedObject.x)) continue;
+			if (isnan(sTrackedObject.y)) continue;
+			if (isnan(sTrackedObject.z)) continue;
+			if (isnan(sTrackedObject.roll)) continue;
+			if (isnan(sTrackedObject.pitch)) continue;
+			if (isnan(sTrackedObject.yaw)) continue;
+
+			circles.push_back(sTrackedObject);
 		}
 	}
 	
-	// Early rejection if the candidate circles are not enough
+// 	std::cout << "found " << circles.size() << " circles\n";
+	
+	// Early rejection if the candidate circles are just not enough
 	if (circles.size()<NUM_CIRCLES) {
 		return;
 	}
 	
+	// Search for the nearest circle to predefined center point (3D)
+	const int nearestIx = nearest3DObjIx(circles,SEARCH_X,SEARCH_Y,SEARCH_Z);
+	
+	// Search for the knn (k=5) of the nearest point
+	std::vector<std::pair<int,double> > knn = knn3DObjIx(circles,circles[nearestIx].x,circles[nearestIx].y,circles[nearestIx].z);
+
+	std::vector<STrackedObject> knnCircles;
+    for (int i = 0; i < NUM_CIRCLES; i++) {
+		knnCircles.push_back(circles[knn[i].first]);
+    }
     std::cout << "--" << std::endl;
 	
-	std::pair<int,int> firstAndThirdCircles = largestDistIndices(circles);
-	std::pair<float,float> midXYFirstAndThird = midPoint(circles, firstAndThirdCircles);
-	std::pair<float,float> midXYRef = midPoint(circles);
-	double refAngle = angleBetweenPts(midXYFirstAndThird,midXYRef) - 0.5*M_PI ;
-	if (refAngle<0) refAngle += ONE_ROUND_RADIAN;
+	std::pair<int,int> firstAndThirdCircles = largestDistIndices(knnCircles); // The first and third circles
+	std::pair<float,float> midXYFirstAndThird = midPoint(knnCircles, firstAndThirdCircles); // The middle point between first and third circles
+	std::pair<float,float> midXYRef = midPoint(knnCircles); // The middle point of the 5 points
+	double refAngle = angleBetweenPts(midXYFirstAndThird,midXYRef) - 0.5*M_PI ; // The reference line 
+	if (refAngle<0) refAngle += ONE_ROUND_RADIAN; // Turn it to [0, 2PI)
+    std::cout << refAngle/M_PI*180 << std::endl;
 	
-	std::cout << refAngle/M_PI*180 << std::endl;
-
-	for (std::vector<SSegment>::iterator it=circles.begin(); it!=circles.end(); ++it) {
-		std::cout << it->y << ", ";
-		double angleToRef = angleBetweenPts(std::pair<float,float>(it->x,it->y),midXYRef) - refAngle;
-		it->angleToRef = (angleToRef>=0)? angleToRef : angleToRef+ONE_ROUND_RADIAN;
+	for (std::vector<STrackedObject>::iterator it=knnCircles.begin(); it!=knnCircles.end(); ++it) {
+		double angleToRef = angleBetweenPts(
+			std::pair<float,float>(it->segment.x,it->segment.y),midXYRef) - refAngle;
+		it->segment.angleToRef = (angleToRef>=0)? angleToRef : angleToRef+ONE_ROUND_RADIAN;
 	}
-	std::cout << std::endl;
 	
-	// Sort the detected circles according to the bwRatio
-	std::sort(circles.begin(),circles.end(),compare_circle_pos);
+	// Sort the detected circles according to the angle to reference line
+	std::sort(knnCircles.begin(),knnCircles.end(),circlePositionCompare);
 	
-	// Get the angle from 0th circle to 2nd circle
-	const double angle_offset = angleBetweenCircles( *(circles.begin()), *(circles.begin()+1) );
+	// Turn it back to [-PI, PI)
+	const double angle_offset = refAngle>ONE_ROUND_RADIAN/2 ? refAngle-ONE_ROUND_RADIAN : refAngle ;
 
-// 	// Sanity check: compare the second line's orientation
-// 	// Get the angle from 3rd circle to 4th circle
-// 	double angle_check = angleBetweenCircles( *(circles.begin()+3), *(circles.begin()+4) );
-// 	if (abs(angle_offset-angle_check)>ANGLE_THRLD_RATE) {
-// 		std::cout << "second line doesn't allign!" << std::endl;
-// 		return;
-// 	}
+// 	/*
+	// Sanity check: compare the second line's orientation
+	// Get the angle from 3rd circle to 4th circle
+	double angle_0to2 = angleBetweenPts(
+		std::pair<float,float>((knnCircles.begin())->segment.x,(knnCircles.begin())->segment.y),
+		std::pair<float,float>((knnCircles.begin()+2)->segment.x,(knnCircles.begin()+2)->segment.y)
+	);
+	double angle_4to3 = angleBetweenPts(
+		std::pair<float,float>((knnCircles.begin()+4)->segment.x,(knnCircles.begin()+4)->segment.y),
+		std::pair<float,float>((knnCircles.begin()+3)->segment.x,(knnCircles.begin()+3)->segment.y)
+	);
+	if (abs(angle_0to2-angle_4to3)>ANGLE_THRLD_RATE) {
+		std::cout << "lines doesn't allign!" << std::endl;
+		return;
+	}
+// 	*/
 	
 	int i =0;
 	int personId = 0;
-	for (std::vector<SSegment>::iterator it=circles.begin(); it!=circles.end(); ++it) {
-		double angle = (((*it).angle-angle_offset)/M_PI+1)/2*numCommands;
+	for (std::vector<STrackedObject>::iterator it=knnCircles.begin(); it!=knnCircles.end(); ++it) {
+		double angle = ((it->segment.angle-angle_offset)/M_PI+1)/2*numCommands;
 		int digit = (int)(floor(angle+0.5)+2) % numCommands;
 		personId += digit * pow(4,i);
 		
-		std::cout << i << ": " << it->angleToRef/M_PI*180 << " " << it->bwRatio << " " << digit << std::endl;
-		
-		STrackedObject sTrackedObject = trans->transform(*it);
-		// Filter error values
-		if (isnan(sTrackedObject.x)) continue;
-		if (isnan(sTrackedObject.y)) continue;
-		if (isnan(sTrackedObject.z)) continue;
-		if (isnan(sTrackedObject.roll)) continue;
-		if (isnan(sTrackedObject.pitch)) continue;
-		if (isnan(sTrackedObject.yaw)) continue;
+		std::cout << i << ": " << it->segment.angleToRef/M_PI*180 << " " << it->segment.bwRatio << " " << digit << std::endl;
 		
 		// temp value to hold current detection
 		circle_detection::detection_results objectsToAdd;
 
 		// Convert to ROS standard Coordinate System
-		objectsToAdd.pose.position.x = -sTrackedObject.y;
-		objectsToAdd.pose.position.y = -sTrackedObject.z;
-		objectsToAdd.pose.position.z = sTrackedObject.x;
+		objectsToAdd.pose.position.x = -(*it).y;
+		objectsToAdd.pose.position.y = -(*it).z;
+		objectsToAdd.pose.position.z = (*it).x;
 		// Convert YPR to Quaternion
 		tf::Quaternion q;
-		q.setRPY(sTrackedObject.roll, sTrackedObject.pitch, sTrackedObject.yaw);
+		q.setRPY((*it).roll, (*it).pitch, (*it).yaw);
 		objectsToAdd.pose.orientation.x = q.getX();
 		objectsToAdd.pose.orientation.y = q.getY();
 		objectsToAdd.pose.orientation.z = q.getZ();
 		objectsToAdd.pose.orientation.w = q.getW();
 
 		// This needs to be replaced with a unique label as ratio is unreliable
-		objectsToAdd.uuid = generateUUID(startup_time_str, floor(sTrackedObject.bwratio));
-		objectsToAdd.roundness = sTrackedObject.roundness;
-		objectsToAdd.bwratio = sTrackedObject.bwratio;
-		objectsToAdd.esterror = sTrackedObject.esterror;
+		objectsToAdd.bwratio = (*it).bwratio;
 		objectsToAdd.circleId = i++;
 		objectsToAdd.digit = digit;
 
@@ -190,7 +213,7 @@ void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     }
 
     if (tracked_objects.tracked_objects.size() > 0) {
-		std::cout << "publish" <<std::endl;
+		std::cout << "publish: " << personId <<std::endl;
         pub.publish(tracked_objects);
     }
     memcpy((void*) &msg->data[0], image->data, msg->step * msg->height);
@@ -212,6 +235,7 @@ FindCircle::FindCircle(void) {
 FindCircle::~FindCircle(void) {
     delete image;
     for (int i = 0; i < MAX_PATTERNS; i++) delete detectorArray[i];
+// 	delete detector;
     delete trans;
 }
 
@@ -243,6 +267,7 @@ void FindCircle::init(int argc, char* argv[]) {
     for (int i = 0; i < MAX_PATTERNS; i++) {
         detectorArray[i] = new CCircleDetect(defaultImageWidth, defaultImageHeight);
     }
+//     detector = new CCircleDetect(defaultImageWidth, defaultImageHeight);
 
     image->getSaveNumber();
     image_transport::Subscriber subim = it.subscribe(this->im_topic, 1, &FindCircle::imageCallback, this);
