@@ -60,7 +60,7 @@ std::vector<std::pair<int,double> > knn3DObjIx(const std::vector<STrackedObject>
 		double distSq = distX + distY + distZ;
 		std::cout << distSq << std::endl;
 // 		if (distSq<KNN_DIST_THRLD)
-// 			list.push_back(std::pair<int,double>(i,distSq));
+		list.push_back(std::pair<int,double>(i,distSq));
     }
     std::sort(list.begin(),list.end(),distCompare);
 	return list;
@@ -129,11 +129,11 @@ void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 	// Search for the knn (k=5) of the nearest point
 	std::vector<std::pair<int,double> > knn = knn3DObjIx(circles,circles[nearestIx].x,circles[nearestIx].y,circles[nearestIx].z);
 
-	// Early rejection if the candidate circles are just not enough
-	if (knn.size()<NUM_CIRCLES) {
-		std::cout << "Not enough circles! " << knn.size() << std::endl;
-		return;
-	}
+// 	Early rejection if the candidate circles are just not enough
+// 	if (knn.size()<NUM_CIRCLES) {
+// 		std::cout << "Not enough circles! " << knn.size() << std::endl;
+// 		return;
+// 	}
 	
 	std::vector<STrackedObject> knnCircles;
     for (int i = 0; i < NUM_CIRCLES; i++) {
