@@ -35,6 +35,8 @@
 #define SEARCH_Y	0
 #define SEARCH_Z	0.5
 
+#define KNN_DIST_THRLD	0.05
+
 /*
 struct COMPARE_CIRCLE_POSITION {
 	bool operator() (SSegment i,SSegment j) {

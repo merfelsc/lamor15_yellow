@@ -58,7 +58,9 @@ std::vector<std::pair<int,double> > knn3DObjIx(const std::vector<STrackedObject>
 		double distY = std::pow((circles[i].y - y), 2);
 		double distZ = std::pow((circles[i].z - z), 2);
 		double distSq = distX + distY + distZ;
-		list.push_back(std::pair<int,double>(i,distSq));
+		std::cout << distSq << std::endl;
+		if (distSq<KNN_DIST_THRLD)
+			list.push_back(std::pair<int,double>(i,distSq));
     }
     std::sort(list.begin(),list.end(),distCompare);
 	return list;
@@ -127,18 +129,23 @@ void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 	// Search for the knn (k=5) of the nearest point
 	std::vector<std::pair<int,double> > knn = knn3DObjIx(circles,circles[nearestIx].x,circles[nearestIx].y,circles[nearestIx].z);
 
+	// Early rejection if the candidate circles are just not enough
+	if (knn.size()<NUM_CIRCLES) {
+		std::cout << "Not enough circles! " << knn.size() << std::endl;
+		return;
+	}
+	
 	std::vector<STrackedObject> knnCircles;
     for (int i = 0; i < NUM_CIRCLES; i++) {
 		knnCircles.push_back(circles[knn[i].first]);
     }
-    std::cout << "--" << std::endl;
 	
 	std::pair<int,int> firstAndThirdCircles = largestDistIndices(knnCircles); // The first and third circles
 	std::pair<float,float> midXYFirstAndThird = midPoint(knnCircles, firstAndThirdCircles); // The middle point between first and third circles
 	std::pair<float,float> midXYRef = midPoint(knnCircles); // The middle point of the 5 points
 	double refAngle = angleBetweenPts(midXYFirstAndThird,midXYRef) - 0.5*M_PI ; // The reference line 
 	if (refAngle<0) refAngle += ONE_ROUND_RADIAN; // Turn it to [0, 2PI)
-    std::cout << refAngle/M_PI*180 << std::endl;
+//     std::cout << refAngle/M_PI*180 << std::endl;
 	
 	for (std::vector<STrackedObject>::iterator it=knnCircles.begin(); it!=knnCircles.end(); ++it) {
 		double angleToRef = angleBetweenPts(
@@ -176,7 +183,7 @@ void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 		int digit = (int)(floor(angle+0.5)+2) % numCommands;
 		personId += digit * pow(4,i);
 		
-		std::cout << i << ": " << it->segment.angleToRef/M_PI*180 << " " << it->segment.bwRatio << " " << digit << std::endl;
+// 		std::cout << i << ": " << it->segment.angleToRef/M_PI*180 << " " << it->segment.bwRatio << " " << digit << std::endl;
 		
 		// temp value to hold current detection
 		circle_detection::detection_results objectsToAdd;
@@ -214,6 +221,7 @@ void FindCircle::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 
     if (tracked_objects.tracked_objects.size() > 0) {
 		std::cout << "publish: " << personId <<std::endl;
+		std::cout << "--" << std::endl;
         pub.publish(tracked_objects);
     }
     memcpy((void*) &msg->data[0], image->data, msg->step * msg->height);
