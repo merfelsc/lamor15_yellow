@@ -22,6 +22,16 @@ facts = [ 'The first tanks were built in Lincoln. Interesting, right?',
           'it is physically impossible for pigs to look up into the sky.',
           "duck's quack doesn't echo, and no one knows why.",
           'every year about 98% of atoms in your body are replaced. We robots are so much cooler.',
+          'that 83% of all statistics are made up.',
+          'conferences are mostly visited for the free food and the venue.',
+          'champagne and canapes are the leading cause of death for professors. This fact was brought to you by Christian Dondrup.',
+          'over 30% of all P H D thesises are never cited again.',
+          'a robot could complete a P H D in under 21 minutes.',
+          'I counted to infinity. Twice. Becomes boring.',
+          'robots can not sneeze. Ha chooooooo. Aah. Sorry for that.',
+          'I simulated a super nova implosion of the sun while we started talking. It doesnt look pretty for either of us.',
+          'I could compute any and everything with my big head, but instead I am wasting it on speech synthesis.'
+          'the nicer the venue the lower the probability of a P H D student being the first author.',
           'there is a city called Rome on every continent.' ]
 
 history = {}
