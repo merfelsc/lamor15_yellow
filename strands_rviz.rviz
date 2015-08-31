@@ -224,7 +224,7 @@ Visualization Manager:
       Show Axes: false
       Show Descriptions: true
       Show Visual Aids: false
-      Update Topic: /betty_go_to/update
+      Update Topic: /betty_markers/update
       Value: true
   Enabled: true
   Global Options:
@@ -250,22 +250,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 34.1224
+      Distance: 17.7526
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 9.82102
-        Y: 1.95242
-        Z: 1.69937
+        X: 5.71675
+        Y: 2.11713
+        Z: 1.81207
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 1.3848
+      Pitch: 1.3198
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.75358
+      Yaw: 4.69858
     Saved: ~
 Window Geometry:
   Displays:

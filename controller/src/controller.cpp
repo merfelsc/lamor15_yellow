@@ -42,7 +42,7 @@ void Controller::startDialog()
     } else {
       ss<<"times";
     }
-    ss << " before.";
+    ss << " before. ";
 
     if(it_count->second == 3) {
       // tell him about the weather
@@ -61,7 +61,7 @@ void Controller::startDialog()
       if(client_facts.call(srv)) {
         // we got a new fact
         std::cerr<<"Received a new fact: " << srv.response.fact << std::endl;
-        ss << "Fact: ";
+        ss << "Did you know that ";
         ss << srv.response.fact << std::endl;
       } else {
         std::cerr<<"Did not receive a new fact."<<std::endl;
@@ -118,7 +118,7 @@ void Controller::tagSubscriber(const circle_detection::detection_results_array::
 
   if(person_last_id == _msg->personId) {
     person_counter++;
-    std::cerr<<"Seen person " << person_last_id<<" now " <<person_counter<<" times."<<std::endl;
+    std::cerr<<"Recognized person " << person_last_id<<" now " <<person_counter<<" times in a row."<<std::endl;
   } else {
     person_counter=1;
   }
@@ -142,7 +142,9 @@ void Controller::update()
   if(!initialized) {
     rnd_walk_start.call(srv);
     initialized=true; // will never bet to false again
-  }
+    std::cerr<<"Look at this *gaze*!"<<std::endl;
+		startGaze();
+}
 
 	if (new_task)
 	{
@@ -150,8 +152,7 @@ void Controller::update()
 		std::cerr<<"Let's stop here for a while..."<<std::endl;
 		rnd_walk_stop.call(srv);
 
-    std::cerr<<"Look at this *gaze*!"<<std::endl;
-		startGaze();
+
 		std::cerr<<"I feel active...*talk*"<<std::endl;
 		startDialog();		
 
@@ -159,8 +160,8 @@ void Controller::update()
 		updatePersonSeen(person_id);
 		
     std::cerr<<"Stop staring ... this is embarassing."<<std::endl;
-		ac_gaze.cancelAllGoals();
-		std::cerr<<"I would like to start roaming again!"<<std::endl;
+		//ac_gaze.cancelAllGoals();
+		std::cerr<<"I would like to start roaming again..."<<std::endl;
 		rnd_walk_start.call(srv);
 
     // discard perception from now on
