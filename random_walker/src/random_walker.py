@@ -7,6 +7,7 @@ import actionlib
 import topological_navigation.msg
 from strands_navigation_msgs.msg import TopologicalMap
 from std_srvs.srv import Empty
+from std_srvs.srv import EmptyResponse
 from random import shuffle
 
 class topol_map_info(object):
@@ -68,12 +69,12 @@ class random_walker(object):
 
     def _start_random_walk(self, req):
         self._running = True
-        return EmptySrvResponse()
+        return EmptyResponse()
         
     def _stop_random_walk(self, req):
         self._running = False
         self._action.cancle_action()
-        return EmptySrvResponse()
+        return EmptyResponse()
         
     def run(self):
         while not rospy.is_shutdown():
