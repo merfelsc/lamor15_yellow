@@ -59,8 +59,8 @@ std::vector<std::pair<int,double> > knn3DObjIx(const std::vector<STrackedObject>
 		double distZ = std::pow((circles[i].z - z), 2);
 		double distSq = distX + distY + distZ;
 		std::cout << distSq << std::endl;
-		if (distSq<KNN_DIST_THRLD)
-			list.push_back(std::pair<int,double>(i,distSq));
+// 		if (distSq<KNN_DIST_THRLD)
+// 			list.push_back(std::pair<int,double>(i,distSq));
     }
     std::sort(list.begin(),list.end(),distCompare);
 	return list;
