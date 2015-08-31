@@ -9,8 +9,18 @@ from facts.srv import *
 facts = [ 'The first tanks were built in Lincoln.', 
           'The earliest origins of Lincoln can be traced to the remains of an Iron Age settlement of round wooden dwellings.',
           'The robot Bob tells jocks but they are not that funny.',
-          'Lincoln is the only place in the world where you can find an original copy of Magna Carta together with the Charter of the Forest, issued in 1217 to amplify the document and one of only two surviving copies.',
-          'Did you know that George Boole was born in Lincolnshire?' ]
+          'Lincoln is the only place in the world where you can find an original copy of Magna Carta together with the Charter of the Forest.',
+          'George Boole was born in Lincolnshire?',
+          'During the 13th century, Lincoln was the third largest city in England',
+          'Isaac Newton was born in Lincolnshire?',
+          'There are three radio stations in Lincolnshire',
+          'In the UK it was illegal to eat mince pies on Christmas Day',
+          'Dying is illegal in the Houses of Parliaments',
+          'The elephant is the only mammal which can not jump',
+          'It is physically impüossible for pigs to look up into the sky',
+          "A duck's quack doesn't echo, and no one knows why",
+          'Every year about 98%% of atoms in your body are replaced',
+          'The is a city called Rome on every continent' ]
 
 history = {}
 
