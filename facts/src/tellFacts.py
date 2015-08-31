@@ -19,7 +19,7 @@ facts = [ 'The first tanks were built in Lincoln. Interesting, right?',
           'in the UK it was illegal to eat mince pies on Christmas Day. I dont mind them, I feed on electricity anyways.',
           'dying is illegal in the Houses of Parliaments.',
           'the elephant is the only mammal which can not jump. I also cant jump. Sad story.',
-          'it is physically impüossible for pigs to look up into the sky.',
+          'it is physically impossible for pigs to look up into the sky.',
           "duck's quack doesn't echo, and no one knows why.",
           'every year about 98% of atoms in your body are replaced. We robots are so much cooler.',
           'there is a city called Rome on every continent.' ]
