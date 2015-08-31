@@ -42,7 +42,7 @@ void Controller::startDialog()
     } else {
       ss<<"times";
     }
-    ss << " before.";
+    ss << " before. ";
 
     if(it_count->second == 3) {
       // tell him about the weather
@@ -61,7 +61,7 @@ void Controller::startDialog()
       if(client_facts.call(srv)) {
         // we got a new fact
         std::cerr<<"Received a new fact: " << srv.response.fact << std::endl;
-        ss << "Fact: ";
+        ss << "Did you know that ";
         ss << srv.response.fact << std::endl;
       } else {
         std::cerr<<"Did not receive a new fact."<<std::endl;
@@ -118,7 +118,7 @@ void Controller::tagSubscriber(const circle_detection::detection_results_array::
 
   if(person_last_id == _msg->personId) {
     person_counter++;
-    std::cerr<<"Seen person " << person_last_id<<" now " <<person_counter<<" times."<<std::endl;
+    std::cerr<<"Recognized person " << person_last_id<<" now " <<person_counter<<" times in a row."<<std::endl;
   } else {
     person_counter=1;
   }
