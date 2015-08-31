@@ -113,6 +113,7 @@ void Controller::tagSubscriber(const circle_detection::detection_results_array::
 {
   // check whether we are sleeping
   if(ros::Time::now() - sleepStarted < ros::Duration(20)) {
+    std::cerr << "sleeping..."<<std::endl;
     return;
   }
 
