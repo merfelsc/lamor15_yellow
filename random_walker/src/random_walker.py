@@ -5,6 +5,7 @@ import sys
 # Brings in the SimpleActionClient
 import actionlib
 import topological_navigation.msg
+import scitos_ptu.msg
 from strands_navigation_msgs.msg import TopologicalMap
 from std_srvs.srv import Empty
 from std_srvs.srv import EmptyResponse
@@ -32,6 +33,8 @@ class topol_nav_client(object):
         rospy.on_shutdown(self._on_node_shutdown)
         self.client = actionlib.SimpleActionClient('topological_navigation', topological_navigation.msg.GotoNodeAction)
         self.client.wait_for_server()
+        self.client2 = actionlib.SimpleActionClient('/SetPTUState', scitos_ptu.msg.PtuGotoAction)
+        self.client2.wait_for_server()
         rospy.loginfo(" ... Init done")
         
     def call_action(self, targ):
@@ -50,7 +53,16 @@ class topol_nav_client(object):
     
         # Prints out the result of executing the action
         ps = self.client.get_result()  # A FibonacciResult
-        print ps        
+        #print ps
+
+        tiltgoal = scitos_ptu.msg.PtuGotoGoal()
+        tiltgoal.pan= 0.0
+        tiltgoal.tilt= 20.0
+        tiltgoal.pan_vel= 0.0
+        tiltgoal.tilt_vel= 20.0
+    
+        # Sends the goal to the action server.
+        self.client2.send_goal(tiltgoal)#,self.done_cb, self.active_cb, self.feedback_cb) 
 
     def cancle_action(self):
         self.client.cancel_all_goals()

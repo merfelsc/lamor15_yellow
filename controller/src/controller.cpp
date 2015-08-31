@@ -262,7 +262,7 @@ void Controller::fillDictionary() {
   name_dict[70] = "Tom Duckett";
   name_dict[71] = "Betty";
   name_dict[72] = "Linda";
-  name_dict[73] = "Lucie";
+  name_dict[73] = "Lucy";
   name_dict[74] = "Bob";
 }
 
