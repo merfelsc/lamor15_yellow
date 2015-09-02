@@ -75,7 +75,12 @@ void Controller::startDialog()
 		ss << std::endl;
 	}	
 
-    speek_rate_.reset();
+  if(person_id == 0){
+    ss.str(""); // clear it
+    ss << "Hi my name is Betty. Obey the robotic overlords." << std::endl;
+  }
+
+  speek_rate_.reset();
 	mary_tts::maryttsGoal goal;
  	goal.text = ss.str();
   std::cerr<<"<speaking>...";
