@@ -189,7 +189,6 @@ void Controller::updatePersonSeen(const int & _person_id) {
 
 void Controller::fillDictionary() {
 	// fill the name dictionary with peoples' names
-  name_dict[0] = "unknown person";
   name_dict[1] = "Primo Zingaretti";
   name_dict[2] = "Rafael Socas";
   name_dict[3] = "Kai Lingemann";
@@ -260,10 +259,23 @@ void Controller::fillDictionary() {
   name_dict[68] = "Roland Siegwart";
   name_dict[69] = "Maja Pantic";
   name_dict[70] = "Tom Duckett";
-  name_dict[71] = "Betty";
-  name_dict[72] = "Linda";
-  name_dict[73] = "Lucy";
-  name_dict[74] = "Bob";
+  name_dict[71] = "Adriana Tapus";
+  name_dict[72] = "Jaime Fentanes";
+  name_dict[73] = "Christian Dondrup";
+  name_dict[74] = "Keerthy Kusumam";
+  name_dict[75] = "Claudio Coppola";
+  name_dict[76] = "Nicola Bellotto";
+  name_dict[77] = "Grzegorz Cielniak";
+  name_dict[78] = "Marc Hanheide";
+  name_dict[79] = "Oscar Mozos";
+  name_dict[80] = "Keerthy Kusuman";
+  name_dict[81] = "Rahman Attar";
+  name_dict[82] = "Claudio Coppola";
+  name_dict[83] = "Ernest Gyebi";
+  name_dict[84] = "Peter Lightbody";
+  name_dict[85] = "Joao Machado Santos";
+  name_dict[86] = "Nicola Reeves";
+  name_dict[87] = "Miroslav Kulich";
 }
 
 int main(int argc, char** argv)
