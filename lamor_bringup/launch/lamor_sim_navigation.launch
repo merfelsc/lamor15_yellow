@@ -3,13 +3,6 @@
   <arg name="mon_nav_config_file" default=""/> 
   <arg name="map" default="$(find lamor_bringup)/resources/betty_bl.yaml"/>
  
-  
-  <!-- 2D Navigation -->
-  <include file="$(find scitos_2d_navigation)/launch/scitos_2d_nav.launch">
-    <arg name="map" value="$(arg map)"/>
-  </include>
-  
-
   <!--- Topological Navigation (includes monitored_navigation) -->
   <include file="$(find topological_navigation)/launch/topological_navigation.launch">
     <arg name="map" value="$(arg dataset)"/>
